@@ -22,9 +22,9 @@
       background: #f3f5f2;
     }
     body {
-      max-width: 880px;
+      max-width: 1400px;
       margin: 0 auto;
-      padding: 32px 20px 56px;
+      padding: 32px 24px 56px;
     }
     h1 { margin: 0 0 8px; font-size: 32px; }
     h2 { margin: 0 0 16px; font-size: 20px; }
@@ -42,24 +42,17 @@
       margin: 18px 0 12px;
     }
     label { display: inline-flex; align-items: center; gap: 8px; }
-    select, input, textarea { font: inherit; }
+    select, input { font: inherit; }
     textarea {
       box-sizing: border-box;
       width: 100%;
-      min-height: 104px;
-      padding: 10px;
+      min-height: 420px;
+      margin-top: 6px;
+      padding: 20px;
       border: 1px solid #9ca8a0;
       background: #fff;
-    }
-    .specimen {
-      min-height: 180px;
-      margin-top: 12px;
-      padding: 18px;
-      overflow-wrap: anywhere;
-      white-space: pre-wrap;
-      border: 1px solid #cbd2cc;
-      background: #fff;
       line-height: 1.5;
+      resize: vertical;
     }
     .downloads { display: flex; flex-wrap: wrap; gap: 12px 24px; }
     .downloads a { color: #145a52; }
@@ -67,6 +60,7 @@
     @media (max-width: 520px) {
       body { padding: 24px 14px 40px; }
       h1 { font-size: 27px; }
+      textarea { min-height: 300px; padding: 14px; }
     }
   </style>
 </head>
@@ -91,9 +85,8 @@
           <output id="font-size-value" for="font-size">36px</output>
         </label>
       </div>
-      <label for="sample-text">表示する文字</label>
+      <label for="sample-text">表示する文字（直接入力・編集できます）</label>
       <textarea id="sample-text" spellcheck="false">NGS Noct M / NGS Noct P&#10;ABCDEFGHIJKLMNOPQRSTUVWXYZ&#10;abcdefghijklmnopqrstuvwxyz&#10;0123456789&#10;!&quot;#$%&amp;'()*+,-./:;&lt;=&gt;?@[\]^_`{|}~&#10;£¥©®–—‘’“”…€™</textarea>
-      <div id="specimen" class="specimen" aria-live="polite"></div>
     </section>
 
     <section aria-labelledby="download-heading">
@@ -114,18 +107,15 @@
     const fontSize = document.querySelector("#font-size");
     const fontSizeValue = document.querySelector("#font-size-value");
     const sampleText = document.querySelector("#sample-text");
-    const specimen = document.querySelector("#specimen");
 
     function updateSpecimen() {
-      specimen.style.fontFamily = fontChoice.value === "mono" ? '"NGS Noct M", monospace' : '"NGS Noct P", sans-serif';
-      specimen.style.fontSize = `${fontSize.value}px`;
-      specimen.textContent = sampleText.value;
+      sampleText.style.fontFamily = fontChoice.value === "mono" ? '"NGS Noct M", monospace' : '"NGS Noct P", sans-serif';
+      sampleText.style.fontSize = `${fontSize.value}px`;
       fontSizeValue.value = `${fontSize.value}px`;
     }
 
     fontChoice.addEventListener("change", updateSpecimen);
     fontSize.addEventListener("input", updateSpecimen);
-    sampleText.addEventListener("input", updateSpecimen);
     updateSpecimen();
   </script>
 </body>
