@@ -1,0 +1,64 @@
+name: Release NGS Noct Fonts
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: font-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: tools/requirements-fonts.txt
+
+      - name: Install font build dependencies
+        run: python -m pip install -r tools/requirements-fonts.txt
+
+      - name: Extract glyphs
+        run: >-
+          python tools/split_glyphs.py
+          --output-dir build/charsvg
+
+      - name: Build fonts
+        run: >-
+          python tools/build_fonts.py
+          --glyph-dir build/charsvg
+          --output-dir build/fonts
+
+      - name: Validate and package release
+        run: >-
+          python tools/build_release.py
+          --font-dir build/fonts
+          --output-dir build/release
+          --version "${GITHUB_REF_NAME}"
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          generate_release_notes: true
+          files: |
+            build/release/NGS-Noct-${{ github.ref_name }}.zip
+            build/release/NGS-Noct.zip
+            build/release/NGSNoctM.ttf
+            build/release/NGSNoctM.woff2
+            build/release/NGSNoctP.ttf
+            build/release/NGSNoctP.woff2
+            build/release/SHA256SUMS.txt

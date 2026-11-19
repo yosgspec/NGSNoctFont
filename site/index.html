@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NGS Noct Fonts</title>
+  <style>
+    @font-face {
+      font-family: "NGS Noct M";
+      src: url("fonts/NGSNoctM.woff2") format("woff2");
+      font-display: swap;
+    }
+    @font-face {
+      font-family: "NGS Noct P";
+      src: url("fonts/NGSNoctP.woff2") format("woff2");
+      font-display: swap;
+    }
+    :root {
+      color-scheme: light;
+      font-family: "Segoe UI", sans-serif;
+      color: #202526;
+      background: #f3f5f2;
+    }
+    body {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 32px 20px 56px;
+    }
+    h1 { margin: 0 0 8px; font-size: 32px; }
+    h2 { margin: 0 0 16px; font-size: 20px; }
+    p { line-height: 1.6; }
+    section {
+      margin-top: 28px;
+      padding-top: 22px;
+      border-top: 1px solid #cbd2cc;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px 24px;
+      margin: 18px 0 12px;
+    }
+    label { display: inline-flex; align-items: center; gap: 8px; }
+    select, input, textarea { font: inherit; }
+    textarea {
+      box-sizing: border-box;
+      width: 100%;
+      min-height: 104px;
+      padding: 10px;
+      border: 1px solid #9ca8a0;
+      background: #fff;
+    }
+    .specimen {
+      min-height: 180px;
+      margin-top: 12px;
+      padding: 18px;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+      border: 1px solid #cbd2cc;
+      background: #fff;
+      line-height: 1.5;
+    }
+    .downloads { display: flex; flex-wrap: wrap; gap: 12px 24px; }
+    .downloads a { color: #145a52; }
+    .note { color: #525d58; font-size: 14px; }
+    @media (max-width: 520px) {
+      body { padding: 24px 14px 40px; }
+      h1 { font-size: 27px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>NGS Noct Fonts</h1>
+    <p>英数字と基本記号を収録した、2種類のフォントです。</p>
+  </header>
+
+  <main>
+    <section aria-labelledby="sample-heading">
+      <h2 id="sample-heading">試し書き</h2>
+      <div class="controls">
+        <label for="font-choice">書体
+          <select id="font-choice">
+            <option value="mono">NGS Noct M（等幅）</option>
+            <option value="proportional">NGS Noct P（プロポーショナル）</option>
+          </select>
+        </label>
+        <label for="font-size">サイズ
+          <input id="font-size" type="range" min="16" max="72" value="36">
+          <output id="font-size-value" for="font-size">36px</output>
+        </label>
+      </div>
+      <label for="sample-text">表示する文字</label>
+      <textarea id="sample-text" spellcheck="false">NGS Noct M / NGS Noct P&#10;ABCDEFGHIJKLMNOPQRSTUVWXYZ&#10;abcdefghijklmnopqrstuvwxyz&#10;0123456789&#10;!&quot;#$%&amp;'()*+,-./:;&lt;=&gt;?@[\]^_`{|}~&#10;£¥©®–—‘’“”…€™</textarea>
+      <div id="specimen" class="specimen" aria-live="polite"></div>
+    </section>
+
+    <section aria-labelledby="download-heading">
+      <h2 id="download-heading">ダウンロード</h2>
+      <div class="downloads">
+        <a href="https://github.com/__GITHUB_REPOSITORY__/releases/latest/download/NGSNoctM.ttf">NGS Noct M（TTF）</a>
+        <a href="https://github.com/__GITHUB_REPOSITORY__/releases/latest/download/NGSNoctM.woff2">NGS Noct M（WOFF2）</a>
+        <a href="https://github.com/__GITHUB_REPOSITORY__/releases/latest/download/NGSNoctP.ttf">NGS Noct P（TTF）</a>
+        <a href="https://github.com/__GITHUB_REPOSITORY__/releases/latest/download/NGSNoctP.woff2">NGS Noct P（WOFF2）</a>
+        <a href="https://github.com/__GITHUB_REPOSITORY__/releases/latest/download/NGS-Noct.zip">全形式まとめて（ZIP）</a>
+      </div>
+      <p class="note">各フォントは空白を含む108文字を収録。Mは等幅、Pはプロポーショナルです。最新版のGitHub Releaseからダウンロードします。</p>
+    </section>
+  </main>
+
+  <script>
+    const fontChoice = document.querySelector("#font-choice");
+    const fontSize = document.querySelector("#font-size");
+    const fontSizeValue = document.querySelector("#font-size-value");
+    const sampleText = document.querySelector("#sample-text");
+    const specimen = document.querySelector("#specimen");
+
+    function updateSpecimen() {
+      specimen.style.fontFamily = fontChoice.value === "mono" ? '"NGS Noct M", monospace' : '"NGS Noct P", sans-serif';
+      specimen.style.fontSize = `${fontSize.value}px`;
+      specimen.textContent = sampleText.value;
+      fontSizeValue.value = `${fontSize.value}px`;
+    }
+
+    fontChoice.addEventListener("change", updateSpecimen);
+    fontSize.addEventListener("input", updateSpecimen);
+    sampleText.addEventListener("input", updateSpecimen);
+    updateSpecimen();
+  </script>
+</body>
+</html>

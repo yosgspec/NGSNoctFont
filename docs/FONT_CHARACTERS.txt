@@ -1,0 +1,7 @@
+収録文字一覧（NGS Noct M / NGS Noct P）
+
+ASCII（95文字。行の先頭は半角スペース）:
+ !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~
+
+追加記号（13文字）:
+£¥©®–—‘’“”…€™
