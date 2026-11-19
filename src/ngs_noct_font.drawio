@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net">
   <diagram name="ページ-1" id="uO75vslFjwPwfRLKqv-H">
-    <mxGraphModel dx="5869" dy="4246" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="3300" pageHeight="2339" math="0" shadow="0">
+    <mxGraphModel dx="3317" dy="2400" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="3300" pageHeight="2339" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -1597,7 +1597,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="AialOQUcR_RiCvd3LF7l-322" connectable="0" parent="1" style="group" value="" vertex="1">
-          <mxGeometry height="160" width="80" x="1000" y="1200" as="geometry" />
+          <mxGeometry height="160" width="80" x="1000" y="1120" as="geometry" />
         </mxCell>
         <mxCell id="AialOQUcR_RiCvd3LF7l-323" edge="1" parent="AialOQUcR_RiCvd3LF7l-322" style="endArrow=none;html=1;rounded=0;defaultLabelBackgroundColor=page;labelPadding=0 4;strokeWidth=10;linecap=round;linejoin=round;snapToPoint=0;" value="">
           <mxGeometry height="50" relative="1" width="50" as="geometry">
