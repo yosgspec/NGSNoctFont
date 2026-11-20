@@ -1,122 +1,866 @@
 <!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>NGS Noct Fonts</title>
-  <style>
-    @font-face {
-      font-family: "NGS Noct M";
-      src: url("fonts/NGSNoctM.woff2") format("woff2");
-      font-display: swap;
-    }
-    @font-face {
-      font-family: "NGS Noct P";
-      src: url("fonts/NGSNoctP.woff2") format("woff2");
-      font-display: swap;
-    }
-    :root {
-      color-scheme: light;
-      font-family: "Segoe UI", sans-serif;
-      color: #202526;
-      background: #f3f5f2;
-    }
-    body {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 32px 24px 56px;
-    }
-    h1 { margin: 0 0 8px; font-size: 32px; }
-    h2 { margin: 0 0 16px; font-size: 20px; }
-    p { line-height: 1.6; }
-    section {
-      margin-top: 28px;
-      padding-top: 22px;
-      border-top: 1px solid #cbd2cc;
-    }
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 16px 24px;
-      margin: 18px 0 12px;
-    }
-    label { display: inline-flex; align-items: center; gap: 8px; }
-    select, input { font: inherit; }
-    textarea {
-      box-sizing: border-box;
-      width: 100%;
-      min-height: 420px;
-      margin-top: 6px;
-      padding: 20px;
-      border: 1px solid #9ca8a0;
-      background: #fff;
-      line-height: 1.5;
-      resize: vertical;
-    }
-    .downloads { display: flex; flex-wrap: wrap; gap: 12px 24px; }
-    .downloads a { color: #145a52; }
-    .note { color: #525d58; font-size: 14px; }
-    @media (max-width: 520px) {
-      body { padding: 24px 14px 40px; }
-      h1 { font-size: 27px; }
-      textarea { min-height: 300px; padding: 14px; }
-    }
-  </style>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>NGS Noct Fonts - 公式見本・配布</title>
+	<style>
+		@font-face {
+			font-family: "NGS Noct M";
+			src: url("fonts/NGSNoctM.woff2") format("woff2");
+			font-weight: 400;
+			font-display: swap;
+		}
+		@font-face {
+			font-family: "NGS Noct M";
+			src: url("fonts/NGSNoctM-Bold.woff2") format("woff2");
+			font-weight: 700;
+			font-display: swap;
+		}
+		@font-face {
+			font-family: "NGS Noct P";
+			src: url("fonts/NGSNoctP.woff2") format("woff2");
+			font-weight: 400;
+			font-display: swap;
+		}
+		@font-face {
+			font-family: "NGS Noct P";
+			src: url("fonts/NGSNoctP-Bold.woff2") format("woff2");
+			font-weight: 700;
+			font-display: swap;
+		}
+		@font-face {
+			font-family: "NGS Noct MF";
+			src: url("fonts/NGSNoctMF.woff2") format("woff2");
+			font-weight: 400;
+			font-display: swap;
+		}
+		@font-face {
+			font-family: "NGS Noct MF";
+			src: url("fonts/NGSNoctMF-Bold.woff2") format("woff2");
+			font-weight: 700;
+			font-display: swap;
+		}
+		@font-face {
+			font-family: "NGS Noct PF";
+			src: url("fonts/NGSNoctPF.woff2") format("woff2");
+			font-weight: 400;
+			font-display: swap;
+		}
+		@font-face {
+			font-family: "NGS Noct PF";
+			src: url("fonts/NGSNoctPF-Bold.woff2") format("woff2");
+			font-weight: 700;
+			font-display: swap;
+		}
+
+		:root {
+			--bg-main: #f6f8fa;
+			--bg-surface: #ffffff;
+			--bg-surface-elevated: #f0f3f6;
+			--bg-input: #ffffff;
+			--border: #d0d7de;
+			--border-focus: #0969da;
+			--accent: #0969da;
+			--accent-hover: #0858b8;
+			--accent-dim: rgba(9, 105, 218, 0.08);
+			--badge-bg: rgba(9, 105, 218, 0.1);
+			--text-main: #1f2328;
+			--text-muted: #59636e;
+			--text-dim: #8c959f;
+			--card-hover-border: #0969da;
+			--radius-sm: 6px;
+			--radius-md: 10px;
+			--radius-lg: 14px;
+			--transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+		}
+
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+		}
+
+		body {
+			background: var(--bg-main);
+			color: var(--text-main);
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+			line-height: 1.6;
+			padding-bottom: 80px;
+			min-height: 100vh;
+		}
+
+		header {
+			max-width: 1200px;
+			margin: 0 auto;
+			padding: 40px 24px 24px;
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: space-between;
+			align-items: flex-start;
+			gap: 20px;
+		}
+
+		.header-content {
+			flex: 1;
+			min-width: 280px;
+		}
+
+		.header-badge {
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
+			padding: 4px 12px;
+			border-radius: 9999px;
+			background: var(--badge-bg);
+			border: 1px solid rgba(9, 105, 218, 0.3);
+			color: var(--accent);
+			font-size: 12px;
+			font-weight: 600;
+			letter-spacing: 0.04em;
+			margin-bottom: 12px;
+		}
+
+		h1 {
+			font-size: clamp(28px, 4.5vw, 38px);
+			font-weight: 800;
+			letter-spacing: -0.02em;
+			color: var(--text-main);
+			margin-bottom: 8px;
+		}
+
+		.header-desc {
+			color: var(--text-muted);
+			font-size: 15px;
+			max-width: 740px;
+		}
+
+		.header-github-link {
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
+			background: var(--bg-surface);
+			color: var(--text-main);
+			border: 1px solid var(--border);
+			padding: 8px 16px;
+			border-radius: var(--radius-sm);
+			font-size: 13px;
+			font-weight: 600;
+			text-decoration: none;
+			transition: var(--transition);
+			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+		}
+
+		.header-github-link:hover {
+			border-color: var(--accent);
+			color: var(--accent);
+			background: #ffffff;
+		}
+
+		.header-github-link svg {
+			width: 18px;
+			height: 18px;
+			fill: currentColor;
+		}
+
+		main {
+			max-width: 1200px;
+			margin: 0 auto;
+			padding: 0 24px;
+			display: flex;
+			flex-direction: column;
+			gap: 32px;
+		}
+
+		.panel {
+			background: var(--bg-surface);
+			border: 1px solid var(--border);
+			border-radius: var(--radius-lg);
+			padding: 24px;
+			box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+		}
+
+		.panel-title {
+			font-size: 18px;
+			font-weight: 700;
+			color: var(--text-main);
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			margin-bottom: 18px;
+		}
+
+		.panel-title::before {
+			content: "";
+			display: inline-block;
+			width: 4px;
+			height: 18px;
+			background: var(--accent);
+			border-radius: 2px;
+		}
+
+		.toolbar {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			justify-content: space-between;
+			gap: 16px;
+			background: var(--bg-surface-elevated);
+			padding: 14px 18px;
+			border-radius: var(--radius-md);
+			border: 1px solid var(--border);
+			margin-bottom: 16px;
+		}
+
+		.tool-group {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			gap: 14px;
+		}
+
+		.pill-nav {
+			display: inline-flex;
+			background: #e9eef2;
+			padding: 3px;
+			border-radius: var(--radius-sm);
+			border: 1px solid var(--border);
+			gap: 2px;
+		}
+
+		.pill-btn {
+			background: transparent;
+			border: none;
+			color: var(--text-muted);
+			padding: 6px 14px;
+			font-size: 13px;
+			font-weight: 600;
+			border-radius: 4px;
+			cursor: pointer;
+			transition: var(--transition);
+			white-space: nowrap;
+		}
+
+		.pill-btn:hover {
+			color: var(--text-main);
+		}
+
+		.pill-btn.active {
+			background: var(--accent);
+			color: #ffffff;
+			box-shadow: 0 1px 4px rgba(9, 105, 218, 0.3);
+		}
+
+		.slider-control {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			font-size: 13px;
+			color: var(--text-muted);
+		}
+
+		.slider-control input[type="range"] {
+			accent-color: var(--accent);
+			width: 100px;
+			cursor: pointer;
+		}
+
+		.slider-val {
+			display: inline-block;
+			min-width: 40px;
+			font-family: monospace;
+			font-weight: 700;
+			color: var(--accent);
+		}
+
+		.preset-tags {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 8px;
+			margin-bottom: 12px;
+		}
+
+		.preset-btn {
+			background: var(--bg-surface);
+			border: 1px solid var(--border);
+			color: var(--text-muted);
+			font-size: 12px;
+			padding: 4px 10px;
+			border-radius: var(--radius-sm);
+			cursor: pointer;
+			transition: var(--transition);
+		}
+
+		.preset-btn:hover {
+			border-color: var(--accent);
+			color: var(--accent);
+			background: var(--accent-dim);
+		}
+
+		.tester-box {
+			position: relative;
+		}
+
+		.tester-textarea {
+			width: 100%;
+			min-height: 240px;
+			background: var(--bg-input);
+			color: var(--text-main);
+			border: 1px solid var(--border);
+			border-radius: var(--radius-md);
+			padding: 20px;
+			font-size: 38px;
+			line-height: 1.4;
+			resize: vertical;
+			outline: none;
+			transition: var(--transition);
+			white-space: pre-wrap;
+			word-break: break-all;
+		}
+
+		.tester-textarea:focus {
+			border-color: var(--border-focus);
+			box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.15);
+		}
+
+		.tester-meta {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-top: 8px;
+			font-size: 12px;
+			color: var(--text-dim);
+		}
+
+		.char-counter {
+			font-family: monospace;
+		}
+
+		.grid-2 {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+			gap: 16px;
+		}
+
+		.compare-card {
+			background: var(--bg-surface-elevated);
+			border: 1px solid var(--border);
+			border-radius: var(--radius-md);
+			padding: 16px 18px;
+			transition: var(--transition);
+		}
+
+		.compare-card:hover {
+			border-color: var(--card-hover-border);
+		}
+
+		.compare-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 6px;
+		}
+
+		.compare-name {
+			font-weight: 700;
+			font-size: 14px;
+			color: var(--accent);
+		}
+
+		.compare-tag {
+			font-size: 11px;
+			background: #e2e8ee;
+			padding: 2px 8px;
+			border-radius: 4px;
+			color: var(--text-muted);
+		}
+
+		.compare-preview {
+			font-size: 24px;
+			color: var(--text-main);
+			min-height: 60px;
+			display: flex;
+			align-items: center;
+			overflow-x: auto;
+			white-space: nowrap;
+			border-top: 1px dashed var(--border);
+			padding-top: 8px;
+			margin-top: 4px;
+		}
+
+		.glyph-category-title {
+			font-size: 13px;
+			font-weight: 700;
+			color: var(--text-muted);
+			letter-spacing: 0.04em;
+			margin: 16px 0 8px;
+		}
+
+		.glyph-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+			gap: 6px;
+		}
+
+		.glyph-cell {
+			aspect-ratio: 1;
+			background: var(--bg-surface-elevated);
+			border: 1px solid var(--border);
+			border-radius: var(--radius-sm);
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			cursor: pointer;
+			transition: var(--transition);
+			user-select: none;
+		}
+
+		.glyph-cell:hover {
+			border-color: var(--accent);
+			background: var(--accent-dim);
+			transform: translateY(-2px);
+			box-shadow: 0 3px 8px rgba(9, 105, 218, 0.15);
+		}
+
+		.glyph-char {
+			font-size: 22px;
+			color: var(--text-main);
+			line-height: 1;
+		}
+
+		.glyph-code {
+			font-size: 9px;
+			color: var(--text-dim);
+			margin-top: 3px;
+			font-family: monospace;
+		}
+
+		.dl-hero-card {
+			background: linear-gradient(135deg, rgba(9, 105, 218, 0.08), rgba(9, 105, 218, 0.02));
+			border: 1px solid var(--accent);
+			border-radius: var(--radius-md);
+			padding: 20px 24px;
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			justify-content: space-between;
+			gap: 16px;
+			margin-bottom: 20px;
+		}
+
+		.dl-hero-info h3 {
+			font-size: 16px;
+			font-weight: 700;
+			color: var(--text-main);
+			margin-bottom: 4px;
+		}
+
+		.dl-hero-info p {
+			font-size: 13px;
+			color: var(--text-muted);
+		}
+
+		.btn-primary {
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
+			background: var(--accent);
+			color: #ffffff;
+			font-size: 14px;
+			font-weight: 700;
+			padding: 10px 22px;
+			border-radius: var(--radius-sm);
+			text-decoration: none;
+			transition: var(--transition);
+			box-shadow: 0 2px 6px rgba(9, 105, 218, 0.25);
+		}
+
+		.btn-primary:hover {
+			background: var(--accent-hover);
+			transform: translateY(-1px);
+			box-shadow: 0 4px 10px rgba(9, 105, 218, 0.35);
+		}
+
+		.dl-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+			gap: 14px;
+		}
+
+		.dl-item {
+			background: var(--bg-surface-elevated);
+			border: 1px solid var(--border);
+			border-radius: var(--radius-md);
+			padding: 16px;
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+			transition: var(--transition);
+		}
+
+		.dl-item:hover {
+			border-color: var(--card-hover-border);
+		}
+
+		.dl-item-title {
+			font-size: 14px;
+			font-weight: 700;
+			color: var(--text-main);
+		}
+
+		.dl-item-desc {
+			font-size: 12px;
+			color: var(--text-muted);
+		}
+
+		.dl-links {
+			display: flex;
+			gap: 8px;
+			margin-top: auto;
+		}
+
+		.dl-chip {
+			display: inline-block;
+			background: #ffffff;
+			border: 1px solid var(--border);
+			color: var(--accent);
+			font-size: 12px;
+			font-weight: 600;
+			padding: 4px 12px;
+			border-radius: var(--radius-sm);
+			text-decoration: none;
+			transition: var(--transition);
+		}
+
+		.dl-chip:hover {
+			background: var(--accent);
+			color: #ffffff;
+			border-color: var(--accent);
+		}
+
+		@media (max-width: 768px) {
+			.toolbar {
+				flex-direction: column;
+				align-items: stretch;
+			}
+			.tool-group {
+				justify-content: space-between;
+			}
+			.tester-textarea {
+				font-size: 26px;
+				min-height: 180px;
+			}
+		}
+	</style>
 </head>
 <body>
-  <header>
-    <h1>NGS Noct Fonts</h1>
-    <p>英数字と基本記号を収録した、2種類のフォントです。</p>
-  </header>
+	<header>
+		<div class="header-content">
+			<div class="header-badge">PSO2:NGS Creative Space Inspired Font</div>
+			<h1>NGS Noct Fonts</h1>
+			<p class="header-desc">
+				『PSO2 ニュージェネシス』のクリエイティブスペースにおいて、ノクト系ビルドパーツを組み合わせて作られた文字を元に設計された幾何学フォントです。
+				等幅（M）、プロポーショナル（P）、行間を縮められる低背版（MF/PF）、および太字（Bold）の計8書体を収録しています。
+			</p>
+		</div>
 
-  <main>
-    <section aria-labelledby="sample-heading">
-      <h2 id="sample-heading">試し書き</h2>
-      <div class="controls">
-        <label for="font-choice">書体
-          <select id="font-choice">
-            <option value="mono">NGS Noct M（等幅）</option>
-            <option value="proportional">NGS Noct P（プロポーショナル）</option>
-          </select>
-        </label>
-        <label for="font-size">サイズ
-          <input id="font-size" type="range" min="16" max="72" value="36">
-          <output id="font-size-value" for="font-size">36px</output>
-        </label>
-      </div>
-      <label for="sample-text">表示する文字（直接入力・編集できます）</label>
-      <textarea id="sample-text" spellcheck="false">NGS Noct M / NGS Noct P&#10;ABCDEFGHIJKLMNOPQRSTUVWXYZ&#10;abcdefghijklmnopqrstuvwxyz&#10;0123456789&#10;!&quot;#$%&amp;'()*+,-./:;&lt;=&gt;?@[\]^_`{|}~&#10;£¥©®–—‘’“”…€™</textarea>
-    </section>
+		<!-- GitHub リポジトリへのリンク -->
+		<a href="https://github.com/__GITHUB_REPOSITORY__" class="header-github-link" target="_blank" rel="noopener noreferrer">
+			<svg viewBox="0 0 16 16" aria-hidden="true">
+				<path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+			</svg>
+			GitHub
+		</a>
+	</header>
 
-    <section aria-labelledby="download-heading">
-      <h2 id="download-heading">ダウンロード</h2>
-      <div class="downloads">
-        <a href="https://github.com/__GITHUB_REPOSITORY__/releases/latest/download/NGSNoctM.ttf">NGS Noct M（TTF）</a>
-        <a href="https://github.com/__GITHUB_REPOSITORY__/releases/latest/download/NGSNoctM.woff2">NGS Noct M（WOFF2）</a>
-        <a href="https://github.com/__GITHUB_REPOSITORY__/releases/latest/download/NGSNoctP.ttf">NGS Noct P（TTF）</a>
-        <a href="https://github.com/__GITHUB_REPOSITORY__/releases/latest/download/NGSNoctP.woff2">NGS Noct P（WOFF2）</a>
-        <a href="https://github.com/__GITHUB_REPOSITORY__/releases/latest/download/NGS-Noct.zip">全形式まとめて（ZIP）</a>
-      </div>
-      <p class="note">各フォントは空白を含む108文字を収録。Mは等幅、Pはプロポーショナルです。最新版のGitHub Releaseからダウンロードします。</p>
-    </section>
-  </main>
+	<main>
+		<!-- 試し書きセクション -->
+		<section class="panel" aria-labelledby="tester-title">
+			<h2 class="panel-title" id="tester-title">インタラクティブ試し書き</h2>
 
-  <script>
-    const fontChoice = document.querySelector("#font-choice");
-    const fontSize = document.querySelector("#font-size");
-    const fontSizeValue = document.querySelector("#font-size-value");
-    const sampleText = document.querySelector("#sample-text");
+			<div class="toolbar">
+				<!-- 書体選択 -->
+				<div class="tool-group">
+					<div class="pill-nav" id="family-selector">
+						<button type="button" class="pill-btn active" data-family="NGS Noct M">M（等幅）</button>
+						<button type="button" class="pill-btn" data-family="NGS Noct P">P（可変幅）</button>
+						<button type="button" class="pill-btn" data-family="NGS Noct MF">MF（等幅低背）</button>
+						<button type="button" class="pill-btn" data-family="NGS Noct PF">PF（可変幅低背）</button>
+					</div>
 
-    function updateSpecimen() {
-      sampleText.style.fontFamily = fontChoice.value === "mono" ? '"NGS Noct M", monospace' : '"NGS Noct P", sans-serif';
-      sampleText.style.fontSize = `${fontSize.value}px`;
-      fontSizeValue.value = `${fontSize.value}px`;
-    }
+					<!-- 太さ切り替え -->
+					<div class="pill-nav" id="weight-selector">
+						<button type="button" class="pill-btn active" data-weight="400">Regular</button>
+						<button type="button" class="pill-btn" data-weight="700">Bold</button>
+					</div>
+				</div>
 
-    fontChoice.addEventListener("change", updateSpecimen);
-    fontSize.addEventListener("input", updateSpecimen);
-    updateSpecimen();
-  </script>
+				<!-- スライダー -->
+				<div class="tool-group">
+					<div class="slider-control">
+						<span>サイズ</span>
+						<input type="range" id="size-slider" min="16" max="96" value="38">
+						<span class="slider-val" id="size-val">38px</span>
+					</div>
+
+					<div class="slider-control">
+						<span>字間</span>
+						<input type="range" id="spacing-slider" min="-2" max="10" value="0">
+						<span class="slider-val" id="spacing-val">0px</span>
+					</div>
+				</div>
+			</div>
+
+			<!-- プリセットテキスト -->
+			<div class="preset-tags">
+				<button type="button" class="preset-btn" data-text="NGS Noct M / NGS Noct P&#10;ABCDEFGHIJKLMNOPQRSTUVWXYZ&#10;abcdefghijklmnopqrstuvwxyz&#10;0123456789&#10;!&quot;#$%&amp;'()*+,-./:;&lt;=&gt;?@[\]^_`{|}~&#10;£¥©®–—‘’“”…€™">全文字見本</button>
+				<button type="button" class="preset-btn" data-text="THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG.&#10;the quick brown fox jumps over the lazy dog.">パングラム (Fox)</button>
+				<button type="button" class="preset-btn" data-text="CENTRAL CITY - AELIO REGION&#10;NOCT SERIES BUILD PARTS&#10;CREATIVE SPACE DESIGN [PROJECT: NOCT]">ゲーム風フレーズ</button>
+				<button type="button" class="preset-btn" data-text="abcdefghijklmnopqrstuvwxyz&#10;gpq | gpq | gpq">小文字・ディセンダー確認</button>
+			</div>
+
+			<div class="tester-box">
+				<textarea id="tester-input" class="tester-textarea" spellcheck="false">NGS Noct M / NGS Noct P
+ABCDEFGHIJKLMNOPQRSTUVWXYZ
+abcdefghijklmnopqrstuvwxyz
+0123456789
+!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
+£¥©®–—‘’“”…€™</textarea>
+				<div class="tester-meta">
+					<span id="current-font-display">適用中: NGS Noct M Regular / 38px</span>
+					<span class="char-counter" id="char-count">0 文字</span>
+				</div>
+			</div>
+		</section>
+
+		<!-- 4書体横並び比較セクション -->
+		<section class="panel" aria-labelledby="compare-title">
+			<h2 class="panel-title" id="compare-title">4書体の比較プレビュー</h2>
+			<div class="grid-2">
+				<div class="compare-card">
+					<div class="compare-header">
+						<span class="compare-name">NGS Noct M</span>
+						<span class="compare-tag">等幅 500u</span>
+					</div>
+					<div class="compare-preview font-m">Sphinx of black quartz, judge my vow. 012345</div>
+				</div>
+				<div class="compare-card">
+					<div class="compare-header">
+						<span class="compare-name">NGS Noct P</span>
+						<span class="compare-tag">プロポーショナル</span>
+					</div>
+					<div class="compare-preview font-p">Sphinx of black quartz, judge my vow. 012345</div>
+				</div>
+				<div class="compare-card">
+					<div class="compare-header">
+						<span class="compare-name">NGS Noct MF</span>
+						<span class="compare-tag">等幅・低背 (-400u)</span>
+					</div>
+					<div class="compare-preview font-mf">Sphinx of black quartz, judge my vow. 012345</div>
+				</div>
+				<div class="compare-card">
+					<div class="compare-header">
+						<span class="compare-name">NGS Noct PF</span>
+						<span class="compare-tag">プロポーショナル・低背 (-400u)</span>
+					</div>
+					<div class="compare-preview font-pf">Sphinx of black quartz, judge my vow. 012345</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- 収録文字グリフグリッド -->
+		<section class="panel" aria-labelledby="glyphs-title">
+			<h2 class="panel-title" id="glyphs-title">収録文字グリフ一覧 (108字)</h2>
+			<p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">文字をクリックすると上の試し書き欄に挿入されます。</p>
+
+			<div class="glyph-category-title">数字 (Digits)</div>
+			<div class="glyph-grid" id="grid-digits"></div>
+
+			<div class="glyph-category-title">大文字 (Uppercase)</div>
+			<div class="glyph-grid" id="grid-uppercase"></div>
+
+			<div class="glyph-category-title">小文字 (Lowercase)</div>
+			<div class="glyph-grid" id="grid-lowercase"></div>
+
+			<div class="glyph-category-title">記号・特殊記号 (Symbols)</div>
+			<div class="glyph-grid" id="grid-symbols"></div>
+		</section>
+
+		<!-- ダウンロードセクション -->
+		<section class="panel" aria-labelledby="dl-title">
+			<h2 class="panel-title" id="dl-title">フォントのダウンロード</h2>
+
+			<!-- おすすめ TTC カード -->
+			<div class="dl-hero-card">
+				<div class="dl-hero-info">
+					<h3>全8書体統合パック (TrueType Collection)</h3>
+					<p>M / P / MF / PF の Regular / Bold 全8書体を1つのファイルに収録した推奨形式です。</p>
+				</div>
+				<a href="https://github.com/__GITHUB_REPOSITORY__/releases/latest/download/NGSNoct.ttc" class="btn-primary">
+					NGSNoct.ttc を入手
+				</a>
+			</div>
+
+			<div class="dl-grid">
+				<div class="dl-item">
+					<div class="dl-item-title">NGS Noct M</div>
+					<div class="dl-item-desc">等幅・通常版（コード・ゲームチャット・固定幅向け）</div>
+					<div class="dl-links">
+						<a class="dl-chip" href="https://github.com/__GITHUB_REPOSITORY__/releases/latest/download/NGSNoctM.ttf">TTF</a>
+						<a class="dl-chip" href="https://github.com/__GITHUB_REPOSITORY__/releases/latest/download/NGSNoctM.woff2">WOFF2</a>
+						<a class="dl-chip" href="https://github.com/__GITHUB_REPOSITORY__/releases/latest/download/NGSNoctM-Bold.ttf">Bold TTF</a>
+					</div>
+				</div>
+
+				<div class="dl-item">
+					<div class="dl-item-title">NGS Noct P</div>
+					<div class="dl-item-desc">プロポーショナル・通常版（自然な文字送り・タイトル向け）</div>
+					<div class="dl-links">
+						<a class="dl-chip" href="https://github.com/__GITHUB_REPOSITORY__/releases/latest/download/NGSNoctP.ttf">TTF</a>
+						<a class="dl-chip" href="https://github.com/__GITHUB_REPOSITORY__/releases/latest/download/NGSNoctP.woff2">WOFF2</a>
+						<a class="dl-chip" href="https://github.com/__GITHUB_REPOSITORY__/releases/latest/download/NGSNoctP-Bold.ttf">Bold TTF</a>
+					</div>
+				</div>
+
+				<div class="dl-item">
+					<div class="dl-item-title">NGS Noct MF</div>
+					<div class="dl-item-desc">等幅・低背版（g/p/q専用形状・狭行間対応）</div>
+					<div class="dl-links">
+						<a class="dl-chip" href="https://github.com/__GITHUB_REPOSITORY__/releases/latest/download/NGSNoctMF.ttf">TTF</a>
+						<a class="dl-chip" href="https://github.com/__GITHUB_REPOSITORY__/releases/latest/download/NGSNoctMF.woff2">WOFF2</a>
+						<a class="dl-chip" href="https://github.com/__GITHUB_REPOSITORY__/releases/latest/download/NGSNoctMF-Bold.ttf">Bold TTF</a>
+					</div>
+				</div>
+
+				<div class="dl-item">
+					<div class="dl-item-title">NGS Noct PF</div>
+					<div class="dl-item-desc">プロポーショナル・低背版（g/p/q専用形状・狭行間対応）</div>
+					<div class="dl-links">
+						<a class="dl-chip" href="https://github.com/__GITHUB_REPOSITORY__/releases/latest/download/NGSNoctPF.ttf">TTF</a>
+						<a class="dl-chip" href="https://github.com/__GITHUB_REPOSITORY__/releases/latest/download/NGSNoctPF.woff2">WOFF2</a>
+						<a class="dl-chip" href="https://github.com/__GITHUB_REPOSITORY__/releases/latest/download/NGSNoctPF-Bold.ttf">Bold TTF</a>
+					</div>
+				</div>
+			</div>
+
+			<div style="margin-top: 18px; text-align: right;">
+				<a href="https://github.com/__GITHUB_REPOSITORY__/releases/latest/download/NGS-Noct.zip" style="color: var(--accent); font-size: 13px; text-decoration: none;">
+					全書体・全形式を一括ダウンロード (ZIP) &rarr;
+				</a>
+			</div>
+		</section>
+	</main>
+
+	<script>
+		const testerInput = document.querySelector("#tester-input");
+		const familyButtons = document.querySelectorAll("#family-selector .pill-btn");
+		const weightButtons = document.querySelectorAll("#weight-selector .pill-btn");
+		const sizeSlider = document.querySelector("#size-slider");
+		const sizeVal = document.querySelector("#size-val");
+		const spacingSlider = document.querySelector("#spacing-slider");
+		const spacingVal = document.querySelector("#spacing-val");
+		const currentFontDisplay = document.querySelector("#current-font-display");
+		const charCount = document.querySelector("#char-count");
+		const presetButtons = document.querySelectorAll(".preset-btn");
+
+		let currentFamily = "NGS Noct M";
+		let currentWeight = "400";
+		let currentSize = "38";
+		let currentSpacing = "0";
+
+		function updateTester(){
+			testerInput.style.fontFamily = `"${currentFamily}", monospace, sans-serif`;
+			testerInput.style.fontWeight = currentWeight;
+			testerInput.style.fontSize = `${currentSize}px`;
+			testerInput.style.letterSpacing = `${currentSpacing}px`;
+
+			const weightLabel = currentWeight === "700" ? "Bold" : "Regular";
+			currentFontDisplay.textContent = `適用中: ${currentFamily} ${weightLabel} / ${currentSize}px`;
+			charCount.textContent = `${testerInput.value.length} 文字`;
+
+			document.querySelectorAll(".glyph-char").forEach(el=>{
+				el.style.fontFamily = `"${currentFamily}", sans-serif`;
+				el.style.fontWeight = currentWeight;
+			});
+		}
+
+		familyButtons.forEach(btn=>{
+			btn.addEventListener("click", ()=>{
+				familyButtons.forEach(b=>b.classList.remove("active"));
+				btn.classList.add("active");
+				currentFamily = btn.getAttribute("data-family");
+				updateTester();
+			});
+		});
+
+		weightButtons.forEach(btn=>{
+			btn.addEventListener("click", ()=>{
+				weightButtons.forEach(b=>b.classList.remove("active"));
+				btn.classList.add("active");
+				currentWeight = btn.getAttribute("data-weight");
+				updateTester();
+			});
+		});
+
+		sizeSlider.addEventListener("input", (e)=>{
+			currentSize = e.target.value;
+			sizeVal.textContent = `${currentSize}px`;
+			updateTester();
+		});
+
+		spacingSlider.addEventListener("input", (e)=>{
+			currentSpacing = e.target.value;
+			spacingVal.textContent = `${currentSpacing}px`;
+			updateTester();
+		});
+
+		presetButtons.forEach(btn=>{
+			btn.addEventListener("click", ()=>{
+				const raw = btn.getAttribute("data-text");
+				const decoded = raw.replace(/&#10;/g, "\n").replace(/&quot;/g, '"').replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+				testerInput.value = decoded;
+				updateTester();
+			});
+		});
+
+		testerInput.addEventListener("input", ()=>{
+			charCount.textContent = `${testerInput.value.length} 文字`;
+		});
+
+		const glyphGroups = {
+			"grid-digits": "0123456789".split(""),
+			"grid-uppercase": "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""),
+			"grid-lowercase": "abcdefghijklmnopqrstuvwxyz".split(""),
+			"grid-symbols": '!\"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~£¥©®–—‘’“”\u2026€™'.split("")
+		};
+
+		for(const [containerId, chars] of Object.entries(glyphGroups)){
+			const container = document.getElementById(containerId);
+			if(!container){
+				continue;
+			}
+			chars.forEach(ch=>{
+				const cell = document.createElement("div");
+				cell.className = "glyph-cell";
+				const code = "U+" + ch.charCodeAt(0).toString(16).toUpperCase().padStart(4, "0");
+				cell.innerHTML = `<span class="glyph-char">${ch}</span><span class="glyph-code">${code}</span>`;
+				cell.title = `${ch} (${code}) - クリックで入力`;
+				cell.addEventListener("click", ()=>{
+					testerInput.value += ch;
+					updateTester();
+					testerInput.focus();
+				});
+				container.appendChild(cell);
+			});
+		}
+
+		document.querySelectorAll(".font-m").forEach(el=>{ el.style.fontFamily = '"NGS Noct M", monospace'; });
+		document.querySelectorAll(".font-p").forEach(el=>{ el.style.fontFamily = '"NGS Noct P", sans-serif'; });
+		document.querySelectorAll(".font-mf").forEach(el=>{ el.style.fontFamily = '"NGS Noct MF", monospace'; });
+		document.querySelectorAll(".font-pf").forEach(el=>{ el.style.fontFamily = '"NGS Noct PF", sans-serif'; });
+
+		updateTester();
+	</script>
 </body>
 </html>

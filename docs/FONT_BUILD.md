@@ -1,6 +1,9 @@
 # フォントの作成方法
 
-draw.io原稿は `source/`、生成ツールは `tools/`、分割済み字形は `charsvg/` にあります。`source/`直下のSVGを1つ自動検出するため、原稿ファイル名は任意です。Windowsでは [../build_fonts.bat](../build_fonts.bat) をダブルクリックすると、字形抽出・フォント生成・サイト用WOFF2の同期を一括実行できます。必要なライブラリがない場合は自動でインストールします。
+生成ツールは `tools/`、正本となる個別字形SVGは `src/charsvg/`、参考用のdraw.io原稿は `src/` にあります。Windowsでは [../build_fonts.bat](../build_fonts.bat) を実行すると、`src/charsvg/` の字形からフォント生成およびサイト用WOFF2の同期を一括実行できます。必要なライブラリがない場合は自動でインストールします。
+
+> [!NOTE]
+> 現在の運用では `src/charsvg/` 配下の字形SVGファイルを直接更新・管理します。原本（draw.io）からの抽出処理（`tools/split_glyphs.py`）は検証用途以外では実行しません。
 
 バッチ実行時のフォント生成先はGit管理外の `build/fonts` です。既存のTTFを開いていても上書きエラーにならないよう、出力先を分けています。作成後、見本ページ用のWOFF2を `site/fonts` にコピーします。
 
@@ -10,16 +13,20 @@ draw.io原稿は `source/`、生成ツールは `tools/`、分割済み字形は
 
 ```powershell
 python -m pip install -r tools/requirements-fonts.txt
-python tools/split_glyphs.py --output-dir build/charsvg --overwrite
-python tools/build_fonts.py --glyph-dir build/charsvg --output-dir fonts
+python tools/optimize_glyph_paths.py --glyph-dir src/charsvg
+python tools/build_fonts.py --glyph-dir src/charsvg --output-dir fonts
 ```
 
-コマンドから実行した場合は、次の4ファイルが `fonts` に生成されます。
+コマンドから実行した場合は、M/P/MF/PF、Regular/Boldの組み合わせ8書体が `fonts` に生成されます（各TTFとWOFF2）。全8フェイスを含むTrueType Collection `NGSNoct.ttc` も生成します。
 
 - `fonts/NGSNoctM.ttf` と `fonts/NGSNoctM.woff2` (フォント名: `NGS Noct M`)
 - `fonts/NGSNoctP.ttf` と `fonts/NGSNoctP.woff2` (フォント名: `NGS Noct P`)
+- `NGSNoctMF` / `NGSNoctPF` は低背版です。`lowercase_mf` / `lowercase_pf` の専用 `g/p/q` を使い、通常版よりフォント垂直メトリクスをY座標2単位（400 units）低くします。MFの等幅送り幅は500 unitsです。
+- `-Bold` は線幅を太くしたBoldウェイトです。Regularと別ファイルとして生成します。
 
-各フォントには、空白、数字、大文字、小文字、および指定した45記号が入ります。TTFはパソコンへのインストール用、WOFF2はWebページでの使用に適した形式です。片方だけ作る場合は、`build_fonts.py` に `--variant lc1` または `--variant lc2` を指定してください。
+各フォントには、空白、数字、大文字、小文字、および指定した45記号が入ります。TTFはパソコンへのインストール用、WOFF2はWebページでの使用に適した形式です。TTCは8フェイスをまとめてインストールする形式です。等幅またはプロポーショナルだけを作る場合は、`build_fonts.py` に `--variant lc1` または `--variant lc2` を指定してください。指定した幅種のRegular/BoldとMF/PFを生成します。
+
+字形SVGは `src/charsvg/` 配下のサブディレクトリ（`digits`, `uppercase`, `lowercase_m`, `lowercase_p`, `lowercase_mf`, `lowercase_pf`, `symbols`）に配置します。ファイル名は文字とUnicodeコードポイント（例: `A_0041.svg`）とし、Windowsのファイル名に使えない文字はコードポイント名（例: `__002F.svg`）にします。全字の表示枠は `120×256px`, `viewBox="-0.5 0.8 3 6.4"` に統一し、40pxを格子座標1つに対応させます。字形の横方向の輪郭中心は `X=1` とし、配置オフセットは丸め前の原稿形状から求めます。パス座標は主にグリッド整数とし、曲線端点や短い点画は0.25刻みに揃えます。原稿の基線位置に合わせて各字を配置し、フォント基線`Y=5`に揃えます。下がり部分はY=7まで使えます。各字形は1つのpathにまとめ、d属性はコマンドごとに改行します。曲線はベジェではなく円弧の A コマンドで出力し、円弧半径は0.25刻みに揃えます。
 
 LC1は空白を含むすべての文字の送り幅を500 unitsに統一した等幅です。LC2は字形の幅に合わせて送り幅を変えるプロポーショナルです。線画はフォントで扱える塗りつぶし輪郭に変換してから収録します。
 
@@ -29,11 +36,11 @@ LC1は空白を含むすべての文字の送り幅を500 unitsに統一した�
 
 ## GitHub Releases
 
-`../.github/workflows/release-fonts.yml` は `v1.2.3` のようなタグをpushすると実行されます。図面から字形を取り出し、4種類のフォント・108文字・等幅/プロポーショナル設定を検証してから、次のファイルをGitHub Releaseへ添付します。
+`../.github/workflows/release-fonts.yml` は `v1.2.3` のようなタグをpushすると実行されます。8書体のフォント・108文字・等幅/プロポーショナル・ウェイト・垂直メトリクスを検証してから、各TTF/WOFF2をGitHub Releaseへ添付します。
 
-- `NGS-Noct-v1.2.3.zip` (4フォントと収録文字一覧)
+- `NGS-Noct-v1.2.3.zip` (8書体のTTF/WOFF2、全書体入りTTC、収録文字一覧)
 - `NGS-Noct.zip` (最新版への固定名リンク)
-- `NGSNoctM.ttf` / `NGSNoctM.woff2` / `NGSNoctP.ttf` / `NGSNoctP.woff2`
+- M/P/MF/PF、Regular/Bold各書体のTTF/WOFF2と全8書体TTC
 - `SHA256SUMS.txt`
 
 リリース梱包処理は `tools/build_release.py` です。
