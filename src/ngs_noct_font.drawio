@@ -649,10 +649,10 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="AialOQUcR_RiCvd3LF7l-128" edge="1" parent="AialOQUcR_RiCvd3LF7l-125" style="endArrow=none;html=1;rounded=0;defaultLabelBackgroundColor=page;labelPadding=0 4;strokeWidth=10;linecap=round;linejoin=round;snapToPoint=0;" value="">
-          <mxGeometry height="50" relative="1" width="50" x="0.6667" as="geometry">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
             <Array as="points" />
             <mxPoint as="sourcePoint" />
-            <mxPoint x="80" y="100" as="targetPoint" />
+            <mxPoint x="80" y="80" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="AialOQUcR_RiCvd3LF7l-129" connectable="0" parent="1" style="group" value="" vertex="1">

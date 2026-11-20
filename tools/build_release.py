@@ -8,7 +8,7 @@ import sys
 import zipfile
 from pathlib import Path
 
-from fontTools.ttLib import TTFont
+from fontTools.ttLib import TTCollection, TTFont
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -29,8 +29,14 @@ EXTRA_CODEPOINTS = {
 }
 EXPECTED_CODEPOINTS = set(range(0x20, 0x7F)) | EXTRA_CODEPOINTS
 FONTS = {
-    "NGSNoctM": ("NGS Noct M", True),
-    "NGSNoctP": ("NGS Noct P", False),
+    "NGSNoctM": ("NGS Noct M", True, False, False),
+    "NGSNoctM-Bold": ("NGS Noct M", True, True, False),
+    "NGSNoctP": ("NGS Noct P", False, False, False),
+    "NGSNoctP-Bold": ("NGS Noct P", False, True, False),
+    "NGSNoctMF": ("NGS Noct MF", True, False, True),
+    "NGSNoctMF-Bold": ("NGS Noct MF", True, True, True),
+    "NGSNoctPF": ("NGS Noct PF", False, False, True),
+    "NGSNoctPF-Bold": ("NGS Noct PF", False, True, True),
 }
 DOCUMENTS = (
     PROJECT_ROOT / "docs" / "FONT_CHARACTERS.txt",
@@ -39,7 +45,14 @@ DOCUMENTS = (
 TAG_RE = re.compile(r"v\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?\Z")
 
 
-def validate_font(path: Path, family_name: str, is_monospaced: bool, is_woff2: bool) -> None:
+def validate_font(
+    path: Path,
+    family_name: str,
+    is_monospaced: bool,
+    is_bold: bool,
+    is_compact: bool,
+    is_woff2: bool,
+) -> None:
     with TTFont(path) as font:
         cmap = font.getBestCmap()
         missing = EXPECTED_CODEPOINTS - set(cmap)
@@ -59,6 +72,13 @@ def validate_font(path: Path, family_name: str, is_monospaced: bool, is_woff2: b
             raise ValueError(f"{path.name} has an unexpected unitsPerEm value")
         if (font.flavor == "woff2") != is_woff2:
             raise ValueError(f"{path.name} has an unexpected font format")
+        if font["OS/2"].usWeightClass != (700 if is_bold else 400):
+            raise ValueError(f"{path.name} has an unexpected weight class")
+        expected_descender = -50 if is_compact else -450
+        if font["hhea"].descent != expected_descender:
+            raise ValueError(f"{path.name} has unexpected vertical metrics")
+        if font["hhea"].ascent - font["hhea"].descent != (900 if is_compact else 1300):
+            raise ValueError(f"{path.name} does not have the expected two-unit Short height reduction")
         if font["post"].isFixedPitch != int(is_monospaced):
             raise ValueError(f"{path.name} has an unexpected fixed-pitch flag")
 
@@ -76,9 +96,10 @@ def validate_font(path: Path, family_name: str, is_monospaced: bool, is_woff2: b
                 if abs(glyph.xMin + glyph.xMax - advance) > 1:
                     raise ValueError(f"{path.name} has an off-center glyph for U+{codepoint:04X}")
 
-        if is_monospaced and advances != {500}:
-            raise ValueError(f"{path.name} is not consistently 500 units wide")
-        if not is_monospaced and len(advances) < 8:
+        expected_mono_advance = 500
+        if is_monospaced and advances != {expected_mono_advance}:
+            raise ValueError(f"{path.name} is not consistently {expected_mono_advance} units wide")
+        if not is_monospaced and len(advances) < 2:
             raise ValueError(f"{path.name} does not have proportional advances")
 
 
@@ -102,12 +123,12 @@ def main() -> int:
 
     try:
         font_paths = []
-        for basename, (family_name, is_monospaced) in FONTS.items():
+        for basename, (family_name, is_monospaced, is_bold, is_compact) in FONTS.items():
             for extension in ("ttf", "woff2"):
                 path = args.font_dir / f"{basename}.{extension}"
                 if not path.is_file():
                     raise FileNotFoundError(f"missing release font: {path}")
-                validate_font(path, family_name, is_monospaced, extension == "woff2")
+                validate_font(path, family_name, is_monospaced, is_bold, is_compact, extension == "woff2")
                 font_paths.append(path)
 
         for document in DOCUMENTS:
@@ -120,6 +141,17 @@ def main() -> int:
             release_path = args.output_dir / path.name
             shutil.copyfile(path, release_path)
             release_font_paths.append(release_path)
+
+        collection_source = args.font_dir / "NGSNoct.ttc"
+        if not collection_source.is_file():
+            raise FileNotFoundError(f"missing font collection: {collection_source}")
+        collection = TTCollection(str(collection_source), lazy=True)
+        if len(collection.fonts) != len(FONTS):
+            raise ValueError(f"{collection_source.name} must contain {len(FONTS)} faces")
+        collection.close()
+        collection_path = args.output_dir / collection_source.name
+        shutil.copyfile(collection_source, collection_path)
+        release_font_paths.append(collection_path)
 
         archive_path = args.output_dir / f"NGS-Noct-{args.version}.zip"
         latest_archive_path = args.output_dir / "NGS-Noct.zip"
@@ -140,7 +172,7 @@ def main() -> int:
     except (OSError, ValueError, zipfile.BadZipFile) as error:
         parser.error(str(error))
 
-    print(f"Validated 4 fonts with {len(EXPECTED_CODEPOINTS)} characters each.")
+    print(f"Validated {len(FONTS)} fonts with {len(EXPECTED_CODEPOINTS)} characters each.")
     print(f"Created {archive_path}")
     print(f"Created {checksum_path}")
     return 0

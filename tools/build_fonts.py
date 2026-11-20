@@ -15,7 +15,8 @@ from fontTools.pens.recordingPen import RecordingPen
 from fontTools.pens.transformPen import TransformPen
 from fontTools.pens.ttGlyphPen import TTGlyphPen
 from fontTools.svgLib.path import parse_path
-from shapely.geometry import LineString, MultiPolygon, Point, Polygon
+from fontTools.ttLib import TTCollection, TTFont
+from shapely.geometry import LineString, MultiPolygon, Point, Polygon, box
 from shapely.geometry.polygon import orient
 from shapely.ops import unary_union
 
@@ -23,7 +24,7 @@ from shapely.ops import unary_union
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 SVG_NS = "http://www.w3.org/2000/svg"
 UNITS_PER_EM = 1000
-SVG_SCALE = 5
+SVG_SCALE = 200
 MONO_ADVANCE_WIDTH = 500
 PROP_SIDE_BEARING = 40
 CAP_HEIGHT = 800
@@ -31,29 +32,36 @@ X_HEIGHT = 410
 ASCENDER = 850
 DESCENDER = -450
 BASELINES = {
-    "digits": 162,
-    "uppercase": 482,
-    "lowercase_1": 802,
-    "lowercase_2": 1122,
+    "digits": 5,
+    "uppercase": 5,
+    "lowercase_m": 5,
+    "lowercase_p": 5,
 }
 ROWS = {
     "digits": "1234567890",
     "uppercase": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-    "lowercase_1": "abcdefghijklmnopqrstuvwxyz",
-    "lowercase_2": "abcdefghijklmnopqrstuvwxyz",
+    "lowercase_m": "abcdefghijklmnopqrstuvwxyz",
+    "lowercase_p": "abcdefghijklmnopqrstuvwxyz",
 }
 ASCII_SYMBOLS = string.punctuation
 EXTRA_SYMBOLS = "£¥©®–—‘’“”…€™"
 SYMBOLS = ASCII_SYMBOLS + EXTRA_SYMBOLS
 SYMBOL_BASELINES = {
-    **{character: 1442 for character in ASCII_SYMBOLS[:26]},
-    **{character: 1762 for character in ASCII_SYMBOLS[26:] + EXTRA_SYMBOLS},
+    **{character: 5 for character in SYMBOLS},
 }
 
 Matrix = tuple[float, float, float, float, float, float]
 IDENTITY: Matrix = (1, 0, 0, 1, 0, 0)
 TRANSFORM_RE = re.compile(r"([A-Za-z]+)\s*\(([^)]*)\)")
 NUMBER_RE = re.compile(r"[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:[eE][-+]?\d+)?")
+
+
+def glyph_filename(character: str) -> str:
+    if ord(character) >= 32 and character not in '<>:"/\\|?* ':
+        stem = character
+    else:
+        stem = "_"
+    return f"{stem}_{ord(character):04X}.svg"
 
 
 @dataclass(frozen=True)
@@ -243,23 +251,9 @@ def collect_strokes(element: ET.Element, parent_transform: Matrix = IDENTITY) ->
     return strokes
 
 
-def make_geometry(svg_path: Path, baseline: float):
+def make_geometry(svg_path: Path, baseline: float, stroke_scale: float = 1.0):
     root = ET.parse(svg_path).getroot()
-    layer = next(
-        (element for element in root.iter(f"{{{SVG_NS}}}g") if element.get("data-cell-id") == "1"),
-        None,
-    )
-    if layer is None:
-        raise ValueError(f"missing draw.io layer in {svg_path}")
-    glyph_groups = [
-        child
-        for child in layer
-        if child.get("data-cell-id") not in (None, "0", "1")
-    ]
-    if not glyph_groups:
-        raise ValueError(f"expected drawing cells in {svg_path}, found none")
-
-    strokes = [stroke for glyph_group in glyph_groups for stroke in collect_strokes(glyph_group)]
+    strokes = collect_strokes(root)
     if not strokes:
         raise ValueError(f"no stroked paths in {svg_path}")
 
@@ -275,7 +269,7 @@ def make_geometry(svg_path: Path, baseline: float):
             centerline = LineString(points)
         shapes.append(
             centerline.buffer(
-                stroke.width * SVG_SCALE / 2,
+                stroke.width * stroke_scale * SVG_SCALE / 2,
                 cap_style="round",
                 join_style="round",
                 quad_segs=8,
@@ -348,10 +342,18 @@ def notdef_glyph(advance_width: float):
     return pen.glyph()
 
 
-def build_font(variant: str, glyph_dir: Path, output_dir: Path) -> tuple[Path, Path]:
-    is_monospaced = variant == "lc1"
-    default_advance = MONO_ADVANCE_WIDTH if is_monospaced else 260
-    lowercase_dir = glyph_dir / ("lowercase_1" if variant == "lc1" else "lowercase_2")
+def build_font(
+    variant: str,
+    glyph_dir: Path,
+    output_dir: Path,
+    compact: bool = False,
+    bold: bool = False,
+) -> tuple[Path, Path]:
+    is_monospaced = variant in ("lc1", "m")
+    mono_advance = MONO_ADVANCE_WIDTH
+    default_advance = mono_advance if is_monospaced else 260
+    lowercase_family = "lowercase_m" if is_monospaced else "lowercase_p"
+    lowercase_dir = glyph_dir / lowercase_family
     source_dirs = {
         "digits": glyph_dir / "digits",
         "uppercase": glyph_dir / "uppercase",
@@ -362,25 +364,26 @@ def build_font(variant: str, glyph_dir: Path, output_dir: Path) -> tuple[Path, P
     baseline_by_character = {
         **{character: BASELINES["digits"] for character in "0123456789"},
         **{character: BASELINES["uppercase"] for character in string.ascii_uppercase},
-        **{character: BASELINES[f"lowercase_{variant[-1]}"] for character in string.ascii_lowercase},
+        **{character: BASELINES[lowercase_family] for character in string.ascii_lowercase},
         **SYMBOL_BASELINES,
     }
     source_by_character = {
-        **{character: source_dirs["digits"] / f"{character}.svg" for character in "0123456789"},
-        **{character: source_dirs["uppercase"] / f"{character}.svg" for character in string.ascii_uppercase},
-        **{character: source_dirs["lowercase"] / f"{character}.svg" for character in string.ascii_lowercase},
-        **{
-            character: glyph_dir / "symbols" / f"U+{ord(character):04X}.svg"
-            for character in SYMBOLS
-        },
+        **{character: source_dirs["digits"] / glyph_filename(character) for character in "0123456789"},
+        **{character: source_dirs["uppercase"] / glyph_filename(character) for character in string.ascii_uppercase},
+        **{character: source_dirs["lowercase"] / glyph_filename(character) for character in string.ascii_lowercase},
+        **{character: glyph_dir / "symbols" / glyph_filename(character) for character in SYMBOLS},
     }
+    if compact:
+        short_lowercase_dir = glyph_dir / ("lowercase_mf" if is_monospaced else "lowercase_pf")
+        for character in "gpq":
+            source_by_character[character] = short_lowercase_dir / glyph_filename(character)
 
     glyph_order = [".notdef", "space"]
     glyph_names = {character: f"uni{ord(character):04X}" for character in characters}
     glyph_order.extend(glyph_names[character] for character in characters)
     notdef_left_bearing = max(50, round(default_advance * 0.15))
     glyphs = {".notdef": notdef_glyph(default_advance), "space": empty_glyph()}
-    space_advance = MONO_ADVANCE_WIDTH if is_monospaced else 260
+    space_advance = mono_advance if is_monospaced else 260
     metrics = {
         ".notdef": (default_advance, notdef_left_bearing),
         "space": (space_advance, 0),
@@ -390,10 +393,12 @@ def build_font(variant: str, glyph_dir: Path, output_dir: Path) -> tuple[Path, P
         source = source_by_character[character]
         if not source.exists():
             raise FileNotFoundError(f"missing glyph SVG: {source}")
-        geometry, _ = make_geometry(source, baseline_by_character[character])
+        geometry, _ = make_geometry(source, baseline_by_character[character], 1.4 if bold else 1.0)
+        if compact and character == "|":
+            geometry = geometry.intersection(box(-1_000_000, 0, 1_000_000, 1_000_000))
         glyph_width = geometry.bounds[2] - geometry.bounds[0]
         advance_width = (
-            MONO_ADVANCE_WIDTH
+            mono_advance
             if is_monospaced
             else math.ceil(glyph_width + PROP_SIDE_BEARING * 2)
         )
@@ -410,31 +415,39 @@ def build_font(variant: str, glyph_dir: Path, output_dir: Path) -> tuple[Path, P
         if is_monospaced
         else ("NGS Noct P", "NGSNoctP")
     )
+    if compact:
+        family_name = "NGS Noct MF" if is_monospaced else "NGS Noct PF"
+        postscript_name = "NGSNoctMF" if is_monospaced else "NGSNoctPF"
+    if bold:
+        postscript_name += "-Bold"
+    style_name = "Bold" if bold else "Regular"
+    full_name = f"{family_name} {style_name}" if bold else family_name
     builder = FontBuilder(UNITS_PER_EM, isTTF=True)
     builder.setupGlyphOrder(glyph_order)
     builder.setupCharacterMap({32: "space", **{ord(char): glyph_names[char] for char in characters}})
     builder.setupGlyf(glyphs)
     builder.setupHorizontalMetrics(metrics)
-    builder.setupHorizontalHeader(ascent=ASCENDER, descent=DESCENDER)
+    descender = DESCENDER + 2 * SVG_SCALE if compact else DESCENDER
+    builder.setupHorizontalHeader(ascent=ASCENDER, descent=descender)
     builder.setupNameTable(
         {
             "familyName": family_name,
-            "styleName": "Regular",
+            "styleName": style_name,
             "uniqueFontIdentifier": f"{postscript_name}-1.0",
-            "fullName": family_name,
+            "fullName": full_name,
             "psName": postscript_name,
             "version": "Version 1.0",
         }
     )
     builder.setupOS2(
         sTypoAscender=ASCENDER,
-        sTypoDescender=DESCENDER,
+        sTypoDescender=descender,
         sTypoLineGap=100,
         usWinAscent=900,
-        usWinDescent=450,
+        usWinDescent=abs(descender),
         sxHeight=X_HEIGHT,
         sCapHeight=CAP_HEIGHT,
-        usWeightClass=400,
+        usWeightClass=700 if bold else 400,
         usWidthClass=5,
     )
     builder.setupPost(isFixedPitch=1 if is_monospaced else 0)
@@ -451,17 +464,29 @@ def build_font(variant: str, glyph_dir: Path, output_dir: Path) -> tuple[Path, P
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Build LC1 and LC2 TTF/WOFF2 fonts from grouped glyph SVGs.")
-    parser.add_argument("--glyph-dir", type=Path, default=PROJECT_ROOT / "charsvg")
+    parser = argparse.ArgumentParser(description="Build NGS Noct M/P/MF/PF TTF, WOFF2, and TTC fonts from glyph SVGs.")
+    parser.add_argument("--glyph-dir", type=Path, default=PROJECT_ROOT / "src" / "charsvg")
     parser.add_argument("--output-dir", type=Path, default=PROJECT_ROOT / "fonts")
     parser.add_argument("--variant", choices=("lc1", "lc2", "both"), default="both")
     args = parser.parse_args()
 
     variants = ("lc1", "lc2") if args.variant == "both" else (args.variant,)
     try:
+        ttf_paths = []
         for variant in variants:
-            for path in build_font(variant, args.glyph_dir, args.output_dir):
-                print(f"Generated {path}")
+            for compact in (False, True):
+                for bold in (False, True):
+                    for path in build_font(variant, args.glyph_dir, args.output_dir, compact, bold):
+                        print(f"Generated {path}")
+                        if path.suffix == ".ttf":
+                            ttf_paths.append(path)
+        if args.variant == "both":
+            collection = TTCollection()
+            collection.fonts = [TTFont(path) for path in ttf_paths]
+            collection_path = args.output_dir / "NGSNoct.ttc"
+            collection.save(collection_path)
+            collection.close()
+            print(f"Generated {collection_path}")
     except (ET.ParseError, OSError, ValueError) as error:
         parser.error(str(error))
     return 0

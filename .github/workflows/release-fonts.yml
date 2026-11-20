@@ -31,15 +31,10 @@ jobs:
       - name: Install font build dependencies
         run: python -m pip install -r tools/requirements-fonts.txt
 
-      - name: Extract glyphs
-        run: >-
-          python tools/split_glyphs.py
-          --output-dir build/charsvg
-
       - name: Build fonts
         run: >-
           python tools/build_fonts.py
-          --glyph-dir build/charsvg
+          --glyph-dir src/charsvg
           --output-dir build/fonts
 
       - name: Validate and package release
@@ -59,6 +54,19 @@ jobs:
             build/release/NGS-Noct.zip
             build/release/NGSNoctM.ttf
             build/release/NGSNoctM.woff2
+            build/release/NGSNoctM-Bold.ttf
+            build/release/NGSNoctM-Bold.woff2
             build/release/NGSNoctP.ttf
             build/release/NGSNoctP.woff2
+            build/release/NGSNoctP-Bold.ttf
+            build/release/NGSNoctP-Bold.woff2
+            build/release/NGSNoctMF.ttf
+            build/release/NGSNoctMF.woff2
+            build/release/NGSNoctMF-Bold.ttf
+            build/release/NGSNoctMF-Bold.woff2
+            build/release/NGSNoctPF.ttf
+            build/release/NGSNoctPF.woff2
+            build/release/NGSNoctPF-Bold.ttf
+            build/release/NGSNoctPF-Bold.woff2
+            build/release/NGSNoct.ttc
             build/release/SHA256SUMS.txt
