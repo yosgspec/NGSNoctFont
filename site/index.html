@@ -310,7 +310,7 @@
 			border-radius: var(--radius-md);
 			padding: 20px;
 			font-size: 38px;
-			line-height: 1.4;
+			line-height: normal;
 			resize: vertical;
 			outline: none;
 			transition: var(--transition);
@@ -376,16 +376,15 @@
 		}
 
 		.compare-preview {
-			font-size: 24px;
+			font-size: 22px;
 			color: var(--text-main);
-			min-height: 60px;
-			display: flex;
-			align-items: center;
-			overflow-x: auto;
-			white-space: nowrap;
+			min-height: 80px;
+			display: block;
+			line-height: normal;
+			white-space: pre-line;
 			border-top: 1px dashed var(--border);
-			padding-top: 8px;
-			margin-top: 4px;
+			padding-top: 10px;
+			margin-top: 6px;
 		}
 
 		.glyph-category-title {
@@ -642,30 +641,38 @@ abcdefghijklmnopqrstuvwxyz
 				<div class="compare-card">
 					<div class="compare-header">
 						<span class="compare-name">NGS Noct M</span>
-						<span class="compare-tag">等幅 500u</span>
+						<span class="compare-tag">等幅・通常 (行高 1.30em)</span>
 					</div>
-					<div class="compare-preview font-m">Sphinx of black quartz, judge my vow. 012345</div>
+					<div class="compare-preview font-m">SPHINX OF BLACK QUARTZ
+the quick brown fox jumps over
+0123456789 | gpq</div>
 				</div>
 				<div class="compare-card">
 					<div class="compare-header">
 						<span class="compare-name">NGS Noct P</span>
-						<span class="compare-tag">プロポーショナル</span>
+						<span class="compare-tag">可変幅・通常 (行高 1.30em)</span>
 					</div>
-					<div class="compare-preview font-p">Sphinx of black quartz, judge my vow. 012345</div>
+					<div class="compare-preview font-p">SPHINX OF BLACK QUARTZ
+the quick brown fox jumps over
+0123456789 | gpq</div>
 				</div>
 				<div class="compare-card">
 					<div class="compare-header">
 						<span class="compare-name">NGS Noct MF</span>
-						<span class="compare-tag">等幅・低背 (-400u)</span>
+						<span class="compare-tag" style="color: var(--accent); font-weight: 700;">等幅・低背 (行高 0.90em / -31%)</span>
 					</div>
-					<div class="compare-preview font-mf">Sphinx of black quartz, judge my vow. 012345</div>
+					<div class="compare-preview font-mf">SPHINX OF BLACK QUARTZ
+the quick brown fox jumps over
+0123456789 | gpq</div>
 				</div>
 				<div class="compare-card">
 					<div class="compare-header">
 						<span class="compare-name">NGS Noct PF</span>
-						<span class="compare-tag">プロポーショナル・低背 (-400u)</span>
+						<span class="compare-tag" style="color: var(--accent); font-weight: 700;">可変幅・低背 (行高 0.90em / -31%)</span>
 					</div>
-					<div class="compare-preview font-pf">Sphinx of black quartz, judge my vow. 012345</div>
+					<div class="compare-preview font-pf">SPHINX OF BLACK QUARTZ
+the quick brown fox jumps over
+0123456789 | gpq</div>
 				</div>
 			</div>
 		</section>
@@ -775,9 +782,12 @@ abcdefghijklmnopqrstuvwxyz
 			testerInput.style.fontWeight = currentWeight;
 			testerInput.style.fontSize = `${currentSize}px`;
 			testerInput.style.letterSpacing = `${currentSpacing}px`;
+			testerInput.style.lineHeight = "normal";
 
+			const isFlat = currentFamily.includes("F");
 			const weightLabel = currentWeight === "700" ? "Bold" : "Regular";
-			currentFontDisplay.textContent = `適用中: ${currentFamily} ${weightLabel} / ${currentSize}px`;
+			const heightLabel = isFlat ? "行高: 0.90em (-31% 短縮)" : "行高: 1.30em (標準)";
+			currentFontDisplay.textContent = `適用中: ${currentFamily} ${weightLabel} / ${currentSize}px / ${heightLabel}`;
 			charCount.textContent = `${testerInput.value.length} 文字`;
 
 			document.querySelectorAll(".glyph-char").forEach(el=>{
