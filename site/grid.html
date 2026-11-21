@@ -481,20 +481,20 @@
 					</defs>
 
 					<!-- グリッド背景矩形 -->
-					<rect id="bg-grid-rect" x="-0.5" y="0.8" width="3.0" height="6.4" fill="url(#pat-major)" />
+					<rect id="bg-grid-rect" x="-0.5" y="0.8" width="4.0" height="6.4" fill="url(#pat-major)" />
 
 					<!-- 基準ガイドライン -->
 					<g id="guidelines-group">
 						<!-- X=1.0 中心線 -->
 						<line x1="1.0" y1="0.8" x2="1.0" y2="7.2" stroke="var(--guide-center)" stroke-width="0.03" stroke-dasharray="0.1, 0.05" />
 						<!-- Y=1.0 Cap Height -->
-						<line x1="-0.5" y1="1.0" x2="2.5" y2="1.0" stroke="var(--guide-cap)" stroke-width="0.03" stroke-dasharray="0.1, 0.05" />
+						<line x1="-0.5" y1="1.0" x2="3.5" y2="1.0" stroke="var(--guide-cap)" stroke-width="0.03" stroke-dasharray="0.1, 0.05" />
 						<!-- Y=3.0 x-Height -->
-						<line x1="-0.5" y1="3.0" x2="2.5" y2="3.0" stroke="var(--guide-x)" stroke-width="0.03" stroke-dasharray="0.1, 0.05" />
+						<line x1="-0.5" y1="3.0" x2="3.5" y2="3.0" stroke="var(--guide-x)" stroke-width="0.03" stroke-dasharray="0.1, 0.05" />
 						<!-- Y=5.0 Baseline (重要) -->
-						<line x1="-0.5" y1="5.0" x2="2.5" y2="5.0" stroke="var(--guide-base)" stroke-width="0.05" />
+						<line x1="-0.5" y1="5.0" x2="3.5" y2="5.0" stroke="var(--guide-base)" stroke-width="0.05" />
 						<!-- Y=7.0 Descender -->
-						<line x1="-0.5" y1="7.0" x2="2.5" y2="7.0" stroke="var(--guide-cap)" stroke-width="0.03" stroke-dasharray="0.1, 0.05" />
+						<line x1="-0.5" y1="7.0" x2="3.5" y2="7.0" stroke="var(--guide-cap)" stroke-width="0.03" stroke-dasharray="0.1, 0.05" />
 					</g>
 
 					<!-- 重ね合わせゴーストパス -->
@@ -561,7 +561,7 @@
 		const ghostCatSelect = document.querySelector("#ghost-cat-select");
 		const ghostGlyphSelect = document.querySelector("#ghost-glyph-select");
 
-		const BASE_W = 120;
+		const BASE_W = 160;
 		const BASE_H = 256;
 
 		function updateCanvasSize(){
@@ -570,7 +570,7 @@
 			const h = BASE_H * scale;
 			gridSvg.setAttribute("width", `${w}px`);
 			gridSvg.setAttribute("height", `${h}px`);
-			gridSvg.setAttribute("viewBox", "-0.5 0.8 3 6.4");
+			gridSvg.setAttribute("viewBox", "-0.5 0.8 4 6.4");
 			zoomVal.textContent = `${zoomSlider.value}%`;
 		}
 
