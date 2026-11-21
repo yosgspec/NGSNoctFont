@@ -1,0 +1,748 @@
+<!doctype html>
+<html lang="ja">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>NGS Noct - 字形グリッドインスペクター</title>
+	<style>
+		:root {
+			--bg-main: #f6f8fa;
+			--bg-surface: #ffffff;
+			--bg-elevated: #f0f3f6;
+			--border: #d0d7de;
+			--border-focus: #0969da;
+			--accent: #0969da;
+			--accent-hover: #0858b8;
+			--accent-dim: rgba(9, 105, 218, 0.08);
+			--text-main: #1f2328;
+			--text-muted: #59636e;
+			--text-dim: #8c959f;
+			--grid-line-major: rgba(9, 105, 218, 0.22);
+			--grid-line-minor: rgba(9, 105, 218, 0.08);
+			--guide-base: #cf222e;
+			--guide-cap: #8250df;
+			--guide-x: #1a7f37;
+			--guide-center: #bf8700;
+			--path-main: #1f2328;
+			--path-ghost: #cf222e;
+			--radius-sm: 6px;
+			--radius-md: 10px;
+			--transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+		}
+
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+		}
+
+		body {
+			background: var(--bg-main);
+			color: var(--text-main);
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+			line-height: 1.5;
+			min-height: 100vh;
+			display: flex;
+			flex-direction: column;
+		}
+
+		header {
+			background: var(--bg-surface);
+			border-bottom: 1px solid var(--border);
+			padding: 16px 24px;
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: space-between;
+			align-items: center;
+			gap: 16px;
+		}
+
+		.header-title-group {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+		}
+
+		.header-badge {
+			background: var(--accent-dim);
+			color: var(--accent);
+			border: 1px solid rgba(9, 105, 218, 0.3);
+			padding: 2px 8px;
+			border-radius: 9999px;
+			font-size: 11px;
+			font-weight: 700;
+		}
+
+		h1 {
+			font-size: 18px;
+			font-weight: 800;
+			color: var(--text-main);
+		}
+
+		.nav-links {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+		}
+
+		.nav-link {
+			display: inline-flex;
+			align-items: center;
+			gap: 6px;
+			background: var(--bg-surface);
+			color: var(--text-main);
+			border: 1px solid var(--border);
+			padding: 6px 14px;
+			border-radius: var(--radius-sm);
+			font-size: 13px;
+			font-weight: 600;
+			text-decoration: none;
+			transition: var(--transition);
+		}
+
+		.nav-link:hover {
+			border-color: var(--accent);
+			color: var(--accent);
+		}
+
+		.nav-link svg {
+			width: 14px;
+			height: 14px;
+			fill: currentColor;
+		}
+
+		.app-container {
+			flex: 1;
+			display: flex;
+			max-width: 1400px;
+			width: 100%;
+			margin: 0 auto;
+			padding: 20px 24px;
+			gap: 20px;
+		}
+
+		/* 左サイドバー: パレット */
+		.sidebar {
+			width: 340px;
+			flex-shrink: 0;
+			display: flex;
+			flex-direction: column;
+			gap: 16px;
+		}
+
+		.card {
+			background: var(--bg-surface);
+			border: 1px solid var(--border);
+			border-radius: var(--radius-md);
+			padding: 18px;
+			box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+		}
+
+		.cat-nav {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 4px;
+			margin-bottom: 12px;
+		}
+
+		.cat-btn {
+			background: var(--bg-elevated);
+			border: 1px solid var(--border);
+			color: var(--text-muted);
+			font-size: 12px;
+			font-weight: 600;
+			padding: 4px 10px;
+			border-radius: var(--radius-sm);
+			cursor: pointer;
+			transition: var(--transition);
+		}
+
+		.cat-btn:hover {
+			color: var(--text-main);
+			border-color: var(--accent);
+		}
+
+		.cat-btn.active {
+			background: var(--accent);
+			color: #ffffff;
+			border-color: var(--accent);
+		}
+
+		.search-input {
+			width: 100%;
+			padding: 8px 12px;
+			background: var(--bg-main);
+			border: 1px solid var(--border);
+			border-radius: var(--radius-sm);
+			font-size: 13px;
+			outline: none;
+			margin-bottom: 12px;
+		}
+
+		.search-input:focus {
+			border-color: var(--border-focus);
+			box-shadow: 0 0 0 2px rgba(9, 105, 218, 0.15);
+		}
+
+		.palette-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+			gap: 6px;
+			max-height: 480px;
+			overflow-y: auto;
+			padding-right: 4px;
+		}
+
+		.palette-cell {
+			aspect-ratio: 1;
+			background: var(--bg-elevated);
+			border: 1px solid var(--border);
+			border-radius: var(--radius-sm);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 18px;
+			font-weight: 600;
+			cursor: pointer;
+			transition: var(--transition);
+			user-select: none;
+		}
+
+		.palette-cell:hover {
+			border-color: var(--accent);
+			background: var(--accent-dim);
+		}
+
+		.palette-cell.active {
+			border-color: var(--accent);
+			background: var(--accent);
+			color: #ffffff;
+		}
+
+		/* メインエリア */
+		.main-content {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			gap: 16px;
+		}
+
+		.control-bar {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			justify-content: space-between;
+			gap: 14px;
+			background: var(--bg-surface);
+			border: 1px solid var(--border);
+			border-radius: var(--radius-md);
+			padding: 12px 18px;
+		}
+
+		.control-group {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			gap: 14px;
+		}
+
+		.toggle-label {
+			display: inline-flex;
+			align-items: center;
+			gap: 6px;
+			font-size: 13px;
+			font-weight: 600;
+			color: var(--text-muted);
+			cursor: pointer;
+		}
+
+		.toggle-label input[type="checkbox"] {
+			accent-color: var(--accent);
+			cursor: pointer;
+		}
+
+		.slider-box {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			font-size: 13px;
+			color: var(--text-muted);
+		}
+
+		.slider-box input[type="range"] {
+			accent-color: var(--accent);
+			width: 90px;
+			cursor: pointer;
+		}
+
+		.view-canvas-card {
+			flex: 1;
+			background: var(--bg-surface);
+			border: 1px solid var(--border);
+			border-radius: var(--radius-md);
+			padding: 24px;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			min-height: 520px;
+			overflow: auto;
+			position: relative;
+		}
+
+		.svg-viewport {
+			box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+			background: #ffffff;
+			border: 1px solid var(--border);
+			border-radius: 4px;
+		}
+
+		.legend {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 16px;
+			font-size: 12px;
+			color: var(--text-muted);
+			margin-top: 14px;
+			justify-content: center;
+		}
+
+		.legend-item {
+			display: inline-flex;
+			align-items: center;
+			gap: 6px;
+		}
+
+		.legend-dot {
+			width: 10px;
+			height: 10px;
+			border-radius: 2px;
+		}
+
+		/* パスインスペクト情報 */
+		.inspect-card {
+			background: var(--bg-surface);
+			border: 1px solid var(--border);
+			border-radius: var(--radius-md);
+			padding: 16px 20px;
+		}
+
+		.inspect-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 8px;
+		}
+
+		.inspect-title {
+			font-size: 14px;
+			font-weight: 700;
+		}
+
+		.path-raw {
+			font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+			font-size: 12px;
+			background: var(--bg-main);
+			border: 1px solid var(--border);
+			border-radius: var(--radius-sm);
+			padding: 10px 14px;
+			overflow-x: auto;
+			white-space: pre-wrap;
+			color: var(--text-main);
+		}
+
+		.ghost-selector-box {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			font-size: 13px;
+		}
+
+		.ghost-select {
+			padding: 4px 8px;
+			background: var(--bg-main);
+			border: 1px solid var(--border);
+			border-radius: var(--radius-sm);
+			font-size: 12px;
+			color: var(--text-main);
+		}
+
+		@media (max-width: 900px) {
+			.app-container {
+				flex-direction: column;
+			}
+			.sidebar {
+				width: 100%;
+			}
+		}
+	</style>
+</head>
+<body>
+	<header>
+		<div class="header-title-group">
+			<h1>NGS Noct - 字形グリッドインスペクター</h1>
+			<span class="header-badge">Grid & Path Inspector</span>
+		</div>
+
+		<div class="nav-links">
+			<a href="index.html" class="nav-link">
+				&larr; 見本ページへ戻る
+			</a>
+			<a href="https://github.com/__GITHUB_REPOSITORY__" class="nav-link" target="_blank" rel="noopener noreferrer">
+				<svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
+				GitHub
+			</a>
+		</div>
+	</header>
+
+	<div class="app-container">
+		<!-- 左サイドバー: グリフ選択パレット -->
+		<aside class="sidebar">
+			<div class="card">
+				<div class="cat-nav" id="cat-tabs">
+					<button type="button" class="cat-btn active" data-cat="digits">数字</button>
+					<button type="button" class="cat-btn" data-cat="uppercase">大文字</button>
+					<button type="button" class="cat-btn" data-cat="lowercase_m">小文字 M</button>
+					<button type="button" class="cat-btn" data-cat="lowercase_p">小文字 P</button>
+					<button type="button" class="cat-btn" data-cat="lowercase_mf">低背 MF</button>
+					<button type="button" class="cat-btn" data-cat="lowercase_pf">低背 PF</button>
+					<button type="button" class="cat-btn" data-cat="symbols">記号</button>
+				</div>
+
+				<input type="text" id="search-glyph" class="search-input" placeholder="文字で絞り込み (例: A, g, 5)...">
+
+				<div class="palette-grid" id="palette-grid"></div>
+			</div>
+
+			<!-- 重ね合わせ（ゴースト比較）設定 -->
+			<div class="card">
+				<div style="font-size: 13px; font-weight: 700; margin-bottom: 10px;">ゴースト重ね合わせ比較</div>
+				<label class="toggle-label" style="margin-bottom: 10px;">
+					<input type="checkbox" id="ghost-enabled">
+					別文字を赤色半透明で重ねる
+				</label>
+				<div class="ghost-selector-box" id="ghost-controls" style="display: none;">
+					<select id="ghost-cat-select" class="ghost-select"></select>
+					<select id="ghost-glyph-select" class="ghost-select"></select>
+				</div>
+			</div>
+		</aside>
+
+		<!-- メイン表示領域 -->
+		<section class="main-content">
+			<!-- ツールバー -->
+			<div class="control-bar">
+				<div class="control-group">
+					<div class="slider-box">
+						<span>拡大率</span>
+						<input type="range" id="zoom-slider" min="100" max="600" value="250">
+						<span id="zoom-val" style="min-width: 44px; font-weight: 700; color: var(--accent);">250%</span>
+					</div>
+
+					<label class="toggle-label">
+						<input type="checkbox" id="show-major-grid" checked>
+						主方眼 (1.0)
+					</label>
+
+					<label class="toggle-label">
+						<input type="checkbox" id="show-minor-grid" checked>
+						細方眼 (0.25)
+					</label>
+
+					<label class="toggle-label">
+						<input type="checkbox" id="show-guidelines" checked>
+						基準線
+					</label>
+
+					<label class="toggle-label">
+						<input type="checkbox" id="show-anchors" checked>
+						アンカー端点
+					</label>
+				</div>
+
+				<div class="control-group">
+					<span id="glyph-header-badge" style="font-weight: 700; color: var(--accent);"></span>
+				</div>
+			</div>
+
+			<!-- SVG グリッドキャンバス -->
+			<div class="view-canvas-card">
+				<svg id="grid-svg" class="svg-viewport" xmlns="http://www.w3.org/2000/svg">
+					<defs>
+						<!-- 0.25単位の細グリッドパターン -->
+						<pattern id="pat-minor" width="0.25" height="0.25" patternUnits="userSpaceOnUse">
+							<path d="M 0.25 0 L 0 0 0 0.25" fill="none" stroke="var(--grid-line-minor)" stroke-width="0.02" />
+						</pattern>
+						<!-- 1.0単位の主グリッドパターン -->
+						<pattern id="pat-major" width="1.0" height="1.0" patternUnits="userSpaceOnUse">
+							<rect width="1.0" height="1.0" fill="url(#pat-minor)" id="pat-minor-rect" />
+							<path d="M 1.0 0 L 0 0 0 1.0" fill="none" stroke="var(--grid-line-major)" stroke-width="0.04" />
+						</pattern>
+					</defs>
+
+					<!-- グリッド背景矩形 -->
+					<rect id="bg-grid-rect" x="-0.5" y="0.8" width="3.0" height="6.4" fill="url(#pat-major)" />
+
+					<!-- 基準ガイドライン -->
+					<g id="guidelines-group">
+						<!-- X=1.0 中心線 -->
+						<line x1="1.0" y1="0.8" x2="1.0" y2="7.2" stroke="var(--guide-center)" stroke-width="0.03" stroke-dasharray="0.1, 0.05" />
+						<!-- Y=1.0 Cap Height -->
+						<line x1="-0.5" y1="1.0" x2="2.5" y2="1.0" stroke="var(--guide-cap)" stroke-width="0.03" stroke-dasharray="0.1, 0.05" />
+						<!-- Y=3.0 x-Height -->
+						<line x1="-0.5" y1="3.0" x2="2.5" y2="3.0" stroke="var(--guide-x)" stroke-width="0.03" stroke-dasharray="0.1, 0.05" />
+						<!-- Y=5.0 Baseline (重要) -->
+						<line x1="-0.5" y1="5.0" x2="2.5" y2="5.0" stroke="var(--guide-base)" stroke-width="0.05" />
+						<!-- Y=7.0 Descender -->
+						<line x1="-0.5" y1="7.0" x2="2.5" y2="7.0" stroke="var(--guide-cap)" stroke-width="0.03" stroke-dasharray="0.1, 0.05" />
+					</g>
+
+					<!-- 重ね合わせゴーストパス -->
+					<path id="ghost-path" d="" fill="none" stroke="var(--path-ghost)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round" opacity="0.45" />
+
+					<!-- メイン字形パス -->
+					<path id="main-path" d="" fill="none" stroke="var(--path-main)" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round" />
+
+					<!-- アンカー端点表示レイヤー -->
+					<g id="anchors-layer"></g>
+				</svg>
+
+				<!-- 凡例 -->
+				<div class="legend">
+					<div class="legend-item"><span class="legend-dot" style="background: var(--path-main);"></span> 選択文字 (ストローク)</div>
+					<div class="legend-item"><span class="legend-dot" style="background: var(--path-ghost); opacity: 0.5;"></span> 重ね合わせ (ゴースト)</div>
+					<div class="legend-item"><span class="legend-dot" style="background: var(--guide-base);"></span> Y=5 基線 (Baseline)</div>
+					<div class="legend-item"><span class="legend-dot" style="background: var(--guide-cap);"></span> Y=1 Cap / Y=7 Descender</div>
+					<div class="legend-item"><span class="legend-dot" style="background: var(--guide-x);"></span> Y=3 x-Height</div>
+					<div class="legend-item"><span class="legend-dot" style="background: var(--guide-center);"></span> X=1 中心線</div>
+				</div>
+			</div>
+
+			<!-- パス詳細カード -->
+			<div class="inspect-card">
+				<div class="inspect-header">
+					<span class="inspect-title" id="inspect-glyph-name">字形詳細情報</span>
+					<span id="inspect-command-count" style="font-size: 12px; color: var(--text-dim); font-family: monospace;"></span>
+				</div>
+				<pre class="path-raw" id="path-raw-display"></pre>
+			</div>
+		</section>
+	</div>
+
+	<script id="glyph-data-json" type="application/json">
+{"digits": [{"file": "0_0030.svg", "char": "0", "code": "U+0030", "d": "M0 4       L2 2       L2 4       A1 1 0 1 1 0 4       L0 2       A1 1 0 1 1 2 2", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "1_0031.svg", "char": "1", "code": "U+0031", "d": "M1 5       L1 1       L0 1", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "2_0032.svg", "char": "2", "code": "U+0032", "d": "M2 5       L0 5       L0 4       A1 1 0 0 1 1 3       A1 1 0 1 0 1 1       L0 1", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "3_0033.svg", "char": "3", "code": "U+0033", "d": "M0 5       L1 5       A1 1 0 0 0 1 3       L0 3       L1 3       A1 1 0 0 0 1 1       L0 1", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "4_0034.svg", "char": "4", "code": "U+0034", "d": "M1 1       A1 1 0 0 0 0 2       L0 3       L2 3       M2 1       L2 5", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "5_0035.svg", "char": "5", "code": "U+0035", "d": "M2 1       L0 1       L0 3       L1 3       A1 1 0 1 1 1 5       L0 5", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "6_0036.svg", "char": "6", "code": "U+0036", "d": "M2 2       A1 1 0 1 0 0 2       L0 4       A1 1 0 1 0 1 3       L0 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "7_0037.svg", "char": "7", "code": "U+0037", "d": "M1 5       L1 4       A1 1 0 0 1 2 3       L2 1       L0 1       L0 2", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "8_0038.svg", "char": "8", "code": "U+0038", "d": "M1 3       A1 1 0 1 1 1 1       A1 1 0 1 1 1 3       A1 1 0 1 0 1 5       A1 1 0 1 0 1 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "9_0039.svg", "char": "9", "code": "U+0039", "d": "M1 1       A1 1 0 1 0 1 3       A1 1 0 1 0 1 1       M1 5       A1 1 0 0 0 2 4       L2 2", "viewBox": "-0.5 0.8 3 6.4"}], "lowercase_m": [{"file": "a_0061.svg", "char": "a", "code": "U+0061", "d": "M0 3       L1 3       A1 1 0 1 1 1 5       L0 5       A1 1 0 0 1 1 4       L2 4       L2 5", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "b_0062.svg", "char": "b", "code": "U+0062", "d": "M0 1       L0 5       M1 3       A1 1 0 1 0 1 5       A1 1 0 1 0 1 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "c_0063.svg", "char": "c", "code": "U+0063", "d": "M2 5       L1 5       A1 1 0 1 1 1 3       L2 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "d_0064.svg", "char": "d", "code": "U+0064", "d": "M2 1       L2 5       M1 3       A1 1 0 1 0 1 5       A1 1 0 1 0 1 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "e_0065.svg", "char": "e", "code": "U+0065", "d": "M2 5       L1 5       A1 1 0 1 1 2 4       L0 4", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "f_0066.svg", "char": "f", "code": "U+0066", "d": "M1 5       A1 1 0 0 0 2 4       L2 2       A1 1 0 0 1 3 1       M3 3       L1 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "g_0067.svg", "char": "g", "code": "U+0067", "d": "M0 6       A1 1 0 1 0 2 6       L2 3       M1 3       A1 1 0 1 0 1 5       A1 1 0 1 0 1 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "h_0068.svg", "char": "h", "code": "U+0068", "d": "M0 1       L0 5       M0 4       A1 1 0 1 1 2 4       L2 5", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "i_0069.svg", "char": "i", "code": "U+0069", "d": "M0 3       L0 5       M0 2.25       L0 2", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "j_006A.svg", "char": "j", "code": "U+006A", "d": "M1 5       A1 1 0 0 0 2 4       L2 3       M2 2.25       L2 2", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "k_006B.svg", "char": "k", "code": "U+006B", "d": "M0 1       L0 5       M2 3       L1 3       M2 5       A1 1 0 0 1 1 4       L1 3       A1 1 0 0 0 0 4", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "l_006C.svg", "char": "l", "code": "U+006C", "d": "M1 5       A1 1 0 0 1 0 4       L0 1", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "m_006D.svg", "char": "m", "code": "U+006D", "d": "M1 4       A1 1 0 0 1 2 3       L2 5       M0 4       A1 1 0 0 1 1 3       L1 5       M0 5       L0 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "n_006E.svg", "char": "n", "code": "U+006E", "d": "M0 5       L0 3       M2 5       L2 4       A1 1 0 1 0 0 4", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "o_006F.svg", "char": "o", "code": "U+006F", "d": "M1 3       A1 1 0 1 0 1 5       A1 1 0 1 0 1 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "p_0070.svg", "char": "p", "code": "U+0070", "d": "M1 3       A1 1 0 1 0 1 5       A1 1 0 1 0 1 3       M0 7       L0 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "q_0071.svg", "char": "q", "code": "U+0071", "d": "M1 3       A1 1 0 1 0 1 5       A1 1 0 1 0 1 3       M2 7       L2 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "r_0072.svg", "char": "r", "code": "U+0072", "d": "M0 5       L0 3       M2 3       L1 3       A1 1 0 0 0 0 4", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "s_0073.svg", "char": "s", "code": "U+0073", "d": "M0 5       L1 5       A1 1 0 0 0 2 4       L0 4       A1 1 0 0 1 1 3       L2 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "t_0074.svg", "char": "t", "code": "U+0074", "d": "M2 5       A1 1 0 0 1 1 4       L1 2       M2 3       L0 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "u_0075.svg", "char": "u", "code": "U+0075", "d": "M0 3       L0 4       A1 1 0 1 0 2 4       M2 5       L2 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "v_0076.svg", "char": "v", "code": "U+0076", "d": "M3 3       L3 4       A1 1 0 0 1 2 5       L2 4       A1 1 0 0 0 1 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "w_0077.svg", "char": "w", "code": "U+0077", "d": "M1 3       L1 5       A1 1 0 0 1 0 4       L0 3       M1 4       A1 1 0 0 0 2 5       L2 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "x_0078.svg", "char": "x", "code": "U+0078", "d": "M1 5       A1 1 0 1 0 1 3       M3 3       A1 1 0 1 0 3 5", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "y_0079.svg", "char": "y", "code": "U+0079", "d": "M0 5       L1 5       A1 1 0 0 0 2 4       M0 3       A1 1 0 0 0 1 4       L2 4       L2 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "z_007A.svg", "char": "z", "code": "U+007A", "d": "M2 5       L0 5       L2 3       L0 3", "viewBox": "-0.5 0.8 3 6.4"}], "lowercase_mf": [{"file": "g_0067.svg", "char": "g", "code": "U+0067", "d": "M0 3     A1 1 0 0 1 1 2     L2 2     A1 1 0 0 1 1 3     L0 3     M2 2     L2 3     A1 1 0 0 1 1 4     L0 4", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "p_0070.svg", "char": "p", "code": "U+0070", "d": "M0 2 L2 2 A1 1 0 0 1 0 2 L0 4", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "q_0071.svg", "char": "q", "code": "U+0071", "d": "M2 2 L0 2 A1 1 0 0 0 2 2 L2 4", "viewBox": "-0.5 0.8 3 6.4"}], "lowercase_p": [{"file": "a_0061.svg", "char": "a", "code": "U+0061", "d": "M2 5       L2 3       A1 1 0 0 0 1 4       L1 5       A1 1 0 0 0 2 4", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "b_0062.svg", "char": "b", "code": "U+0062", "d": "M1 1       L1 5       M1 3       A1 1 0 0 1 2 4       L2 5       A1 1 0 0 1 1 4", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "c_0063.svg", "char": "c", "code": "U+0063", "d": "M1 3       A1 1 0 1 0 1 5", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "d_0064.svg", "char": "d", "code": "U+0064", "d": "M2 1       L2 5       M2 4       A1 1 0 0 1 1 5       L1 4       A1 1 0 0 1 2 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "e_0065.svg", "char": "e", "code": "U+0065", "d": "M1 5       A1 1 0 0 1 1 3       L1 4       L0 4", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "f_0066.svg", "char": "f", "code": "U+0066", "d": "M1 1       A1 1 0 0 0 0 2       L0 5       M1 3       L0 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "g_0067.svg", "char": "g", "code": "U+0067", "d": "M2 4       A1 1 0 0 1 1 5       L1 4       A1 1 0 0 1 2 3       L2 6       A1 1 0 0 1 1 7", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "h_0068.svg", "char": "h", "code": "U+0068", "d": "M1 1       L1 5       M1 3       A1 1 0 0 1 2 4       L2 5", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "i_0069.svg", "char": "i", "code": "U+0069", "d": "M0 3       L0 5       M0 2.25       L0 2", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "j_006A.svg", "char": "j", "code": "U+006A", "d": "M1 5       A1 1 0 0 0 2 4       L2 3       M2 2.25       L2 2", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "k_006B.svg", "char": "k", "code": "U+006B", "d": "M0 1       L0 5       M1 5       L0 4       L1 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "l_006C.svg", "char": "l", "code": "U+006C", "d": "M1 5       A1 1 0 0 1 0 4       L0 1", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "m_006D.svg", "char": "m", "code": "U+006D", "d": "M0 5       L0 3       M0 4       A1 1 0 0 1 1 3       L1 5       M0.5 3       L0.5 5", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "n_006E.svg", "char": "n", "code": "U+006E", "d": "M0 5       L0 3       M0 4       A1 1 0 0 1 1 3       L1 5", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "o_006F.svg", "char": "o", "code": "U+006F", "d": "M1 3       L1 5       A1 1 0 0 0 2 4       L2 3       L1 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "p_0070.svg", "char": "p", "code": "U+0070", "d": "M1 7       L1 3       M1 4       A1 1 0 0 1 2 3       L2 4       A1 1 0 0 1 1 5", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "q_0071.svg", "char": "q", "code": "U+0071", "d": "M2 7       L2 3       M2 5       A1 1 0 0 1 1 4       L1 3       A1 1 0 0 1 2 4", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "r_0072.svg", "char": "r", "code": "U+0072", "d": "M0 5       L0 3       M1 3       A1 1 0 0 0 0 4", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "s_0073.svg", "char": "s", "code": "U+0073", "d": "M1 5       A1 1 0 0 0 2 4       L1 4       A1 1 0 0 1 2 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "t_0074.svg", "char": "t", "code": "U+0074", "d": "M1 3       L0 3       M1 5       A1 1 0 0 1 0 4       L0 2", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "u_0075.svg", "char": "u", "code": "U+0075", "d": "M2 4       A1 1 0 0 1 1 5       L1 3       M2 5       L2 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "v_0076.svg", "char": "v", "code": "U+0076", "d": "M0 3       L0 5       L1 4       L1 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "w_0077.svg", "char": "w", "code": "U+0077", "d": "M1 3       L1 5       A1 1 0 0 1 0 4       L0 3       M0.5 3       L0.5 5", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "x_0078.svg", "char": "x", "code": "U+0078", "d": "M0 3       L0 3.5       L1 4.5       L1 5       M1 3       L1 3.5       L0 4.5       L0 5", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "y_0079.svg", "char": "y", "code": "U+0079", "d": "M1 5       A1 1 0 0 0 2 4       M1 3       A1 1 0 0 0 2 4       L2 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "z_007A.svg", "char": "z", "code": "U+007A", "d": "M0 3       L1 3       L1 3.5       L0 4.5       L0 5       L1 5", "viewBox": "-0.5 0.8 3 6.4"}], "lowercase_pf": [{"file": "g_0067.svg", "char": "g", "code": "U+0067", "d": "M0 3     A1 1 0 0 1 1 2     A1 1 0 0 1 0 3     M1 2     L1 3     A1 1 0 0 1 0 4", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "p_0070.svg", "char": "p", "code": "U+0070", "d": "M0 2     L1 2     A1 1 0 0 1 0 3     M0 2     L0 4", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "q_0071.svg", "char": "q", "code": "U+0071", "d": "M1 2     L0 2     A1 1 0 0 0 1 3     M1 2     L1 4", "viewBox": "-0.5 0.8 3 6.4"}], "symbols": [{"file": "!_0021.svg", "char": "!", "code": "U+0021", "d": "M0 4.25       L0 1       M-0.125 5       L0.125 5", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "#_0023.svg", "char": "#", "code": "U+0023", "d": "M0 3       L2 3       L2 2       M1 2       L1 3       L0 4       L0 5       M1 5       L1 4       L2 3       M0 4       L2 4", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "$_0024.svg", "char": "$", "code": "U+0024", "d": "M0 4       A1 1 0 1 0 1 3       A1 1 0 1 1 2 2       M1 1       L1 5", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "%_0025.svg", "char": "%", "code": "U+0025", "d": "M3 2       L1 4       M2 5       A1 1 0 0 0 3 4       A1 1 0 0 0 2 5       M2 1       A1 1 0 0 0 1 2       A1 1 0 0 0 2 1", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "&_0026.svg", "char": "&", "code": "U+0026", "d": "M2 5       A1 1 0 0 1 1 4       L1 1       L2 1       L2 2       A1 1 0 0 1 1 3       A1 1 0 1 0 2 4", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "'_0027.svg", "char": "'", "code": "U+0027", "d": "M0 2       L0 1", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "(_0028.svg", "char": "(", "code": "U+0028", "d": "M1 5       A1 1 0 0 1 0 4       L0 2       A1 1 0 0 1 1 1", "viewBox": "-0.5 0.8 3 6.4"}, {"file": ")_0029.svg", "char": ")", "code": "U+0029", "d": "M1 5       A1 1 0 0 0 2 4       L2 2       A1 1 0 0 0 1 1", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "+_002B.svg", "char": "+", "code": "U+002B", "d": "M1 2       L1 4       M2 3       L0 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": ",_002C.svg", "char": ",", "code": "U+002C", "d": "M1.75 4       L2 4       A1 1 0 0 1 1 5", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "-_002D.svg", "char": "-", "code": "U+002D", "d": "M1 3       L0 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "._002E.svg", "char": ".", "code": "U+002E", "d": "M0 5       L0.25 5", "viewBox": "-0.5 0.8 3 6.4"}, {"file": ";_003B.svg", "char": ";", "code": "U+003B", "d": "M1.75 2       L2 2       M2 4       A1 1 0 0 1 1 5       M2 4       L1.75 4", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "=_003D.svg", "char": "=", "code": "U+003D", "d": "M2 2       L0 2       M2 4       L0 4", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "@_0040.svg", "char": "@", "code": "U+0040", "d": "M2 5       L1 5       A1 1 0 0 1 0 4       L0 2       A1 1 0 0 1 2 2       M2 4       L2 2       A1 1 0 0 0 1 3       L1 4       A1 1 0 0 0 2 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "[_005B.svg", "char": "[", "code": "U+005B", "d": "M1 1       L0 1       L0 5       L1 5", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "]_005D.svg", "char": "]", "code": "U+005D", "d": "M0 1       L1 1       L1 5       L0 5", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "^_005E.svg", "char": "^", "code": "U+005E", "d": "M2 2       L1 1       L0 2", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "__0022.svg", "char": "\"", "code": "U+0022", "d": "M0 2       L0 1       M1 2       L1 1", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "__002A.svg", "char": "*", "code": "U+002A", "d": "M1 2       L1 4       M2 2       L0 4       M0 2       L2 4", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "__002F.svg", "char": "/", "code": "U+002F", "d": "M2 2       L0 4", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "__003A.svg", "char": ":", "code": "U+003A", "d": "M0 2       L0.25 2       M0 4       L0.25 4", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "__003C.svg", "char": "<", "code": "U+003C", "d": "M2 5       L0 3       L2 1", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "__003E.svg", "char": ">", "code": "U+003E", "d": "M0 1       L2 3       L0 5", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "__003F.svg", "char": "?", "code": "U+003F", "d": "M1 4       L1 3       A1 1 0 1 0 0 2       M0.875 5       L1.125 5", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "__005C.svg", "char": "\\", "code": "U+005C", "d": "M2 4       L0 2", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "__005F.svg", "char": "_", "code": "U+005F", "d": "M2 5       L0 5", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "__007C.svg", "char": "|", "code": "U+007C", "d": "M0 1       L0 6", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "`_0060.svg", "char": "`", "code": "U+0060", "d": "M1 2       L0 1", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "{_007B.svg", "char": "{", "code": "U+007B", "d": "M3 5       A1 1 0 0 1 2 4       A1 1 0 0 0 1 3       A1 1 0 0 0 2 2       A1 1 0 0 1 3 1", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "}_007D.svg", "char": "}", "code": "U+007D", "d": "M1 1       A1 1 0 0 1 2 2       A1 1 0 0 0 3 3       A1 1 0 0 0 2 4       A1 1 0 0 1 1 5", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "~_007E.svg", "char": "~", "code": "U+007E", "d": "M2 1       A1 1 0 0 1 1 2       L1 1       A1 1 0 0 0 0 2", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "£_00A3.svg", "char": "£", "code": "U+00A3", "d": "M2 3       A1 1 0 0 1 2 1       L3 1       M3 3       L1 3       A1 1 0 0 1 1 5       L3 5", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "¥_00A5.svg", "char": "¥", "code": "U+00A5", "d": "M1 2       L1 5       M0 4       L2 4       M0 3       L2 3       M0 1       A1 1 0 1 0 2 1", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "©_00A9.svg", "char": "©", "code": "U+00A9", "d": "M0 2       L0 4       A1 1 0 1 0 2 4       L2 2       A1 1 0 0 0 0 2       M1.5 2       A1 1 0 0 0 1.5 4", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "®_00AE.svg", "char": "®", "code": "U+00AE", "d": "M0.5 2       L0.5 4       A1 1 0 1 0 2.5 4       L2.5 2       A1 1 0 0 0 0.5 2       M2 4       L1 3       A1 1 0 0 0 2 2       L1 2       L1 4", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "–_2013.svg", "char": "–", "code": "U+2013", "d": "M0 3       L1.5 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "—_2014.svg", "char": "—", "code": "U+2014", "d": "M2 3       L0 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "‘_2018.svg", "char": "‘", "code": "U+2018", "d": "M0.25 2       L0 2       A1 1 0 0 1 1 1", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "’_2019.svg", "char": "’", "code": "U+2019", "d": "M1.75 1       L2 1       A1 1 0 0 1 1 2", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "“_201C.svg", "char": "“", "code": "U+201C", "d": "M0.25 2       L0 2       A1 1 0 0 1 1 1       M1.25 2       L1 2       A1 1 0 0 1 2 1", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "”_201D.svg", "char": "”", "code": "U+201D", "d": "M1.75 1       L2 1       A1 1 0 0 1 1 2       M2.75 1       L3 1       A1 1 0 0 1 2 2", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "…_2026.svg", "char": "…", "code": "U+2026", "d": "M0 3.25       L0 3       M2 3.25       L2 3       M1 3.25       L1 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "€_20AC.svg", "char": "€", "code": "U+20AC", "d": "M2 4     A1 1 0 1 1 0 4     L0 2     A1 1 0 1 1 2 2     M1 2     L0 2     M1 3     L0 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "™_2122.svg", "char": "™", "code": "U+2122", "d": "M0 1       L1 1       L1 2       A1 1 0 0 1 2 1       L2 2       A1 1 0 0 0 1 1       M0.5 2       L0.5 1", "viewBox": "-0.5 0.8 3 6.4"}], "uppercase": [{"file": "A_0041.svg", "char": "A", "code": "U+0041", "d": "M2 5       L2 2       A1 1 0 1 0 0 2       L0 5       M2 3       L0 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "B_0042.svg", "char": "B", "code": "U+0042", "d": "M0 5       L1 5       A1 1 0 0 0 1 3       L0 3       L1 3       A1 1 0 0 0 1 1       L0 1       L0 5", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "C_0043.svg", "char": "C", "code": "U+0043", "d": "M2 4       A1 1 0 1 1 0 4       L0 2       A1 1 0 1 1 2 2", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "D_0044.svg", "char": "D", "code": "U+0044", "d": "M0 5       L1 5       A1 1 0 0 0 2 4       L2 2       A1 1 0 0 0 1 1       L0 1       L0 5", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "E_0045.svg", "char": "E", "code": "U+0045", "d": "M2 1       L0 1       L0 5       L2 5       M2 3       L0 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "F_0046.svg", "char": "F", "code": "U+0046", "d": "M2 1       L0 1       L0 5       M2 3       L0 3", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "G_0047.svg", "char": "G", "code": "U+0047", "d": "M1 3       L2 3       L2 4       A1 1 0 1 1 0 4       L0 2       A1 1 0 1 1 2 2", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "H_0048.svg", "char": "H", "code": "U+0048", "d": "M0 1       L0 5       M2 3       L0 3       M2 1       L2 5", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "I_0049.svg", "char": "I", "code": "U+0049", "d": "M1 1       L1 5       M2 5       L0 5       M2 1       L0 1", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "J_004A.svg", "char": "J", "code": "U+004A", "d": "M1 1       L2 1       L2 4       A1 1 0 1 1 0 4", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "K_004B.svg", "char": "K", "code": "U+004B", "d": "M0 1       L0 5       M0 3       L1 3       M2 1       L2 2       A1 1 0 0 1 1 3       A1 1 0 0 1 2 4       L2 5", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "L_004C.svg", "char": "L", "code": "U+004C", "d": "M2 5       L0 5       L0 1", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "M_004D.svg", "char": "M", "code": "U+004D", "d": "M3 5       L3 1       A1 1 0 0 0 2 2       L2 5       L2 2       A1 1 0 0 0 1 1       L1 5", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "N_004E.svg", "char": "N", "code": "U+004E", "d": "M2 3       L0 1       L0 5       M2 5       L2 1", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "O_004F.svg", "char": "O", "code": "U+004F", "d": "M0 2       L0 4       A1 1 0 1 0 2 4       L2 2       A1 1 0 1 0 0 2", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "P_0050.svg", "char": "P", "code": "U+0050", "d": "M0 3       L1 3       A1 1 0 0 0 1 1       L0 1       L0 5", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "Q_0051.svg", "char": "Q", "code": "U+0051", "d": "M0 2       L0 4       A1 1 0 1 0 2 4       L2 2       A1 1 0 1 0 0 2       M2 5       L1 4", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "R_0052.svg", "char": "R", "code": "U+0052", "d": "M2 5       L2 4       A1 1 0 0 0 1 3       L0 3       L1 3       A1 1 0 0 0 1 1       L0 1       L0 5", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "S_0053.svg", "char": "S", "code": "U+0053", "d": "M0 4       A1 1 0 1 0 1 3       A1 1 0 1 1 2 2", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "T_0054.svg", "char": "T", "code": "U+0054", "d": "M1 1       L1 5       M2 1       L0 1", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "U_0055.svg", "char": "U", "code": "U+0055", "d": "M2 1       L2 4       A1 1 0 1 1 0 4       L0 1", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "V_0056.svg", "char": "V", "code": "U+0056", "d": "M2 1       L2 4       L1 5       L0 4       L0 1", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "W_0057.svg", "char": "W", "code": "U+0057", "d": "M1 1       L1 5       A1 1 0 0 1 0 4       L0 1       M1 4       A1 1 0 0 0 2 5       L2 1", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "X_0058.svg", "char": "X", "code": "U+0058", "d": "M2 5       L2 4       L0 2       L0 1       M0 5       L0 4       L2 2       L2 1", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "Y_0059.svg", "char": "Y", "code": "U+0059", "d": "M0 1       L0 2       A1 1 0 1 0 2 2       M0 4       A1 1 0 1 0 2 4       L2 1", "viewBox": "-0.5 0.8 3 6.4"}, {"file": "Z_005A.svg", "char": "Z", "code": "U+005A", "d": "M2 5       L0 5       L0 4       L2 2       L2 1       L0 1", "viewBox": "-0.5 0.8 3 6.4"}]}
+	</script>
+
+	<script>
+		const allData = JSON.parse(document.getElementById("glyph-data-json").textContent);
+		let currentCat = "digits";
+		let currentGlyphIndex = 0;
+
+		const catTabs = document.querySelectorAll("#cat-tabs .cat-btn");
+		const paletteGrid = document.querySelector("#palette-grid");
+		const searchGlyph = document.querySelector("#search-glyph");
+		const gridSvg = document.querySelector("#grid-svg");
+		const mainPath = document.querySelector("#main-path");
+		const ghostPath = document.querySelector("#ghost-path");
+		const anchorsLayer = document.querySelector("#anchors-layer");
+		const zoomSlider = document.querySelector("#zoom-slider");
+		const zoomVal = document.querySelector("#zoom-val");
+		const showMajorGrid = document.querySelector("#show-major-grid");
+		const showMinorGrid = document.querySelector("#show-minor-grid");
+		const showGuidelines = document.querySelector("#show-guidelines");
+		const showAnchors = document.querySelector("#show-anchors");
+		const glyphHeaderBadge = document.querySelector("#glyph-header-badge");
+		const pathRawDisplay = document.querySelector("#path-raw-display");
+		const inspectGlyphName = document.querySelector("#inspect-glyph-name");
+		const inspectCommandCount = document.querySelector("#inspect-command-count");
+
+		const ghostEnabled = document.querySelector("#ghost-enabled");
+		const ghostControls = document.querySelector("#ghost-controls");
+		const ghostCatSelect = document.querySelector("#ghost-cat-select");
+		const ghostGlyphSelect = document.querySelector("#ghost-glyph-select");
+
+		const BASE_W = 120;
+		const BASE_H = 256;
+
+		function updateCanvasSize(){
+			const scale = parseInt(zoomSlider.value, 10) / 100;
+			const w = BASE_W * scale;
+			const h = BASE_H * scale;
+			gridSvg.setAttribute("width", `${w}px`);
+			gridSvg.setAttribute("height", `${h}px`);
+			gridSvg.setAttribute("viewBox", "-0.5 0.8 3 6.4");
+			zoomVal.textContent = `${zoomSlider.value}%`;
+		}
+
+		function renderPalette(){
+			paletteGrid.innerHTML = "";
+			const list = allData[currentCat] || [];
+			const filter = searchGlyph.value.trim().toLowerCase();
+
+			list.forEach((item, idx)=>{
+				if(filter && !item.char.toLowerCase().includes(filter) && !item.code.toLowerCase().includes(filter)){
+					return;
+				}
+				const cell = document.createElement("div");
+				cell.className = "palette-cell" + (idx === currentGlyphIndex ? " active" : "");
+				cell.textContent = item.char;
+				cell.title = `${item.char} (${item.code}) - ${item.file}`;
+				cell.addEventListener("click", ()=>{
+					currentGlyphIndex = idx;
+					document.querySelectorAll(".palette-cell").forEach(c=>c.classList.remove("active"));
+					cell.classList.add("active");
+					renderMainGlyph();
+				});
+				paletteGrid.appendChild(cell);
+			});
+		}
+
+		function parsePathPoints(dStr){
+			const tokens = dStr.replace(/,/g, " ").split(/\s+/).filter(Boolean);
+			const points = [];
+			let i = 0;
+			let cur = {x: 0, y: 0};
+			while(i < tokens.length){
+				const cmd = tokens[i].toUpperCase();
+				if(cmd === "M" || cmd === "L"){
+					const x = parseFloat(tokens[i+1]);
+					const y = parseFloat(tokens[i+2]);
+					cur = {x, y, cmd};
+					points.push(cur);
+					i += 3;
+				}else if(cmd === "A"){
+					const x = parseFloat(tokens[i+6]);
+					const y = parseFloat(tokens[i+7]);
+					cur = {x, y, cmd};
+					points.push(cur);
+					i += 8;
+				}else if(cmd === "Z"){
+					i += 1;
+				}else{
+					i += 1;
+				}
+			}
+			return points;
+		}
+
+		function renderMainGlyph(){
+			const list = allData[currentCat] || [];
+			const item = list[currentGlyphIndex];
+			if(!item){
+				return;
+			}
+
+			mainPath.setAttribute("d", item.d);
+			glyphHeaderBadge.textContent = `${item.char} (${item.code}) - ${item.file}`;
+			inspectGlyphName.textContent = `${currentCat} / ${item.file}`;
+			pathRawDisplay.textContent = item.d;
+
+			const mCount = (item.d.match(/\bM/g) || []).length;
+			const lCount = (item.d.match(/\bL/g) || []).length;
+			const aCount = (item.d.match(/\bA/g) || []).length;
+			inspectCommandCount.textContent = `M: ${mCount} | L: ${lCount} | A: ${aCount}`;
+
+			// アンカー端点の描画
+			anchorsLayer.innerHTML = "";
+			if(showAnchors.checked){
+				const pts = parsePathPoints(item.d);
+				pts.forEach((pt, pIdx)=>{
+					const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+					circle.setAttribute("cx", pt.x);
+					circle.setAttribute("cy", pt.y);
+					circle.setAttribute("r", "0.08");
+					circle.setAttribute("fill", pt.cmd === "M" ? "#0969da" : "#1f2328");
+					circle.setAttribute("stroke", "#ffffff");
+					circle.setAttribute("stroke-width", "0.02");
+
+					const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+					title.textContent = `#${pIdx+1} ${pt.cmd} (${pt.x}, ${pt.y})`;
+					circle.appendChild(title);
+
+					anchorsLayer.appendChild(circle);
+				});
+			}
+		}
+
+		function renderGhost(){
+			if(!ghostEnabled.checked){
+				ghostPath.setAttribute("d", "");
+				return;
+			}
+			const ghostCat = ghostCatSelect.value;
+			const ghostIdx = parseInt(ghostGlyphSelect.value, 10);
+			const list = allData[ghostCat] || [];
+			const item = list[ghostIdx];
+			if(item){
+				ghostPath.setAttribute("d", item.d);
+			}else{
+				ghostPath.setAttribute("d", "");
+			}
+		}
+
+		// 初期化・イベント
+		catTabs.forEach(btn=>{
+			btn.addEventListener("click", ()=>{
+				catTabs.forEach(b=>b.classList.remove("active"));
+				btn.classList.add("active");
+				currentCat = btn.getAttribute("data-cat");
+				currentGlyphIndex = 0;
+				renderPalette();
+				renderMainGlyph();
+			});
+		});
+
+		searchGlyph.addEventListener("input", renderPalette);
+
+		zoomSlider.addEventListener("input", updateCanvasSize);
+
+		showMajorGrid.addEventListener("change", (e)=>{
+			document.querySelector("#pat-major path").style.display = e.target.checked ? "block" : "none";
+		});
+
+		showMinorGrid.addEventListener("change", (e)=>{
+			document.querySelector("#pat-minor-rect").style.display = e.target.checked ? "block" : "none";
+		});
+
+		showGuidelines.addEventListener("change", (e)=>{
+			document.querySelector("#guidelines-group").style.display = e.target.checked ? "block" : "none";
+		});
+
+		showAnchors.addEventListener("change", renderMainGlyph);
+
+		// ゴースト設定
+		Object.keys(allData).forEach(cat=>{
+			const opt = document.createElement("option");
+			opt.value = cat;
+			opt.textContent = cat;
+			ghostCatSelect.appendChild(opt);
+		});
+
+		function updateGhostGlyphOptions(){
+			ghostGlyphSelect.innerHTML = "";
+			const list = allData[ghostCatSelect.value] || [];
+			list.forEach((item, idx)=>{
+				const opt = document.createElement("option");
+				opt.value = idx;
+				opt.textContent = `${item.char} (${item.code})`;
+				ghostGlyphSelect.appendChild(opt);
+			});
+			renderGhost();
+		}
+
+		ghostCatSelect.addEventListener("change", updateGhostGlyphOptions);
+		ghostGlyphSelect.addEventListener("change", renderGhost);
+
+		ghostEnabled.addEventListener("change", (e)=>{
+			ghostControls.style.display = e.target.checked ? "flex" : "none";
+			renderGhost();
+		});
+
+		// 初期描画
+		updateGhostGlyphOptions();
+		updateCanvasSize();
+		renderPalette();
+		renderMainGlyph();
+	</script>
+</body>
+</html>
